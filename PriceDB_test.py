@@ -30,7 +30,7 @@ arm = comm_table.lookup("NASDAQ", "ARM.L")
 latest = pdb.lookup_latest(arm,gbp)
 value = latest.get_value()
 
-print(float(value.num) / (float(value.denom ))
+print float(value.num) / float(value.denom )
 
 
 session.end()
