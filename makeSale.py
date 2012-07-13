@@ -15,7 +15,7 @@
 #       MA 02110-1301, USA.
 #
 #
-# Set up with: export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.6/site-packages
+# Set up with: export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.7/site-packages
 # Then: gnucash-env ipython
 # Or: gnucash-env python makeSale.py
 # Records a sale in the Sales and bank accounts
@@ -25,6 +25,7 @@
 #   when it comes to understanding GnuCash.
 
 import gnucash
+from  gnucash import Session
 import gnucash.gnucash_business
 #from gnucash import *
 from gnucash.gnucash_core_c import *
@@ -64,7 +65,7 @@ def gnc_numeric_from_decimal(decimal_value):
 
 # Very basic try for database opening.
 try:
-  session = Session('xml:///home/mikee/Docs/MEC/gnucash/MEC-test')
+  session = Session('/home/mikee/Docs/MEC/gnucash/MEC-test', True, False, False)
 except GnuCashBackendException:
   print "ERROR:  Cannot create session.  Quitting.  Do have GnuCash open?"
   quit()
@@ -149,7 +150,7 @@ trans2.SetDate(datetime.date.today().day,datetime.date.today().month,datetime.da
 split4 = split3.GetOtherSplit()
 split4.SetAccount(sales)
 
-session.save() #
+#session.save() #
 session.end()
 session.destroy()
 

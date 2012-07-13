@@ -15,8 +15,7 @@
 #       MA 02110-1301, USA.
 #
 # @author Mike Evans <mikee@saxicola.co.uk>
-# Set up with: export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python2.6/site-packages
-# Then: gnucash-env ipython
+# Run ipython with: "gnucash-env ipython" and copy/paste for testing
 # Or: gnucash-env python makeSale.py
 # Run this on a TEST database as it will insert an invoice into your system, this
 # may not be what you want.
@@ -41,9 +40,8 @@ SALE_AMOUNT = 0
 SALE_COMMENT = ''
 CURRENCY = {'GBP':'gbp'}
 URI = ''
-FILE = "/home/mikee/Docs/MEC/gnucash/MEC-test"
+FILE = "/path/to/account.gnucash"
 
-#session = Session("xml://%s" % FILE, True)
 '''
 @param
 @return
