@@ -1,14 +1,51 @@
-= PyCash =
+= PyCash
 
-== What's in Here? ==
+A selection of poorly written Python programs using GnuCash Python bindings.  I know they're all a mess but I was just using them to learn the python bindings to GnuCash.  Some of it may be useful to someone though so here they are.
+
+==  What's in Here?
+
 Some Python utilites that GnuCash users may find useful.
 
-1. 
+=== delete_ALL_transactions.py
 
-2.
+Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the busuness data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.
 
-== Disclaimer ==
+=== make_invoice.py
+
+Creates an invoice using the next available serial number.  Currently the invoice contents are hard coded n the file and is very much test code than a practical program.  Modify it suit your needs.
+
+=== make_sale.py
+
+Add a sale directly to the register in Sales.  A mess of code used for testing the principal of creating sales transactions.  I originally planned to take data from an e-shop and auto-populate GnuCash with the sales data.  Unfinished, modify to your needs.
+
+=== PriceDB_test.py
+
+Just gets and prints the latest price for a stock from the GnuCash price DB.
+
+=== PriceDB_test-02.py
+
+I got this off the WWW somewhere and now I forget why and what it does exactly.  Perhaps someone can enlighten me.  Information is in the file header.
+
+
+=== ystockquote.py
+
+From http://www.goldb.org/ystockquote.html
+
+Gets stock quotes from yahoo.  Useage info is in the file.
+
+== Disclaimer
+
 I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.
 
+=== Notes
 
+Mostly for my benefit because: My mind is going. There is no question about it. I can feel it. I can feel it.
 
+Convert this to html with:
+asciidoc README
+
+Convert this to markdown with:
+cat README | sed 's/^=+=/#/g' > README.md
+
+Convert the markdown to html with:
+markdown README.md > README-md.html

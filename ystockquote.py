@@ -10,13 +10,6 @@
 #  License as published by the Free Software Foundation; either
 #  version 2.1 of the License, or (at your option) any later version.
 
-# Useage:
-# >>> import ystockquote
-# >>> print ystockquote.get_price('GOOG')
-# 529.46
-# >>> print ystockquote.get_all('MSFT')
-
-
 
 import urllib
 
@@ -26,10 +19,36 @@ This is the "ystockquote" module.
 
 This module provides a Python API for retrieving stock data from Yahoo Finance.
 
+This module contains the following functions:
+
+    get_all(symbol)
+    get_price(symbol)
+    get_change(symbol)
+    get_volume(symbol)
+    get_avg_daily_volume(symbol)
+    get_stock_exchange(symbol)
+    get_market_cap(symbol)
+    get_book_value(symbol)
+    get_ebitda(symbol)
+    get_dividend_per_share(symbol)
+    get_dividend_yield(symbol)
+    get_earnings_per_share(symbol)
+    get_52_week_high(symbol)
+    get_52_week_low(symbol)
+    get_50day_moving_avg(symbol)
+    get_200day_moving_avg(symbol)
+    get_price_earnings_ratio(symbol)
+    get_price_earnings_growth_ratio(symbol)
+    get_price_sales_ratio(symbol)
+    get_price_book_ratio(symbol)
+    get_short_ratio(symbol)
+    get_historical_prices(symbol, start_yyyymmdd, end_yyyymmdd)
+
 sample usage:
 >>> import ystockquote
 >>> print ystockquote.get_price('GOOG')
-529.46
+529.46 
+>>> print ystockquote.get_all('MSFT')
 """
 
 

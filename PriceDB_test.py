@@ -15,7 +15,7 @@ import os
 import sys
 from datetime import date
 from decimal import Decimal
-FILE = "/home/mikee/Docs/MEC/gnucash/MEC-test"
+FILE = "/home/mikee/Docs/MEC/gnucash/coop-test.gnucash"
 
 
 session = Session("xml://%s" % FILE, False, False, False)
