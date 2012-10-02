@@ -57,7 +57,13 @@ def get_address(addr):
   if addr[0].getElementsByTagName('addr:fax'):  
     fax = addr[0].getElementsByTagName('addr:fax')[0].firstChild.nodeValue
   else: fax = ''
-  address_string = addr1 + "," + addr2 + "," + addr3 + "," + addr4 + "," + ","+ fax + "," + phone + ","
+  if addr[0].getElementsByTagName('addr:email'):  
+    email = addr[0].getElementsByTagName('addr:email')[0].firstChild.nodeValue
+  else: email = ''
+  if addr[0].getElementsByTagName('addr:notes'):  
+    notes = addr[0].getElementsByTagName('addr:notes')[0].firstChild.nodeValue
+  else: notes = ''
+  address_string = ",\"" + name + "\",\"" + addr1 + "\",\"" + addr2 + "\",\"" + addr3 + "\",\"" + addr4 + "\",\"" + phone + "\",\"" + fax + "\"," + email + "\",\"" + notes + "\""
   return address_string
   
 
@@ -84,14 +90,14 @@ def get_customers_vendors(c_or_v = 'customers'):
     billing_address = get_address(addr)
     
       
-    print e_name,",", e_id,",", billing_address, 
+    print "\"" + e_id + "\",\""+ e_name + "\"" +  billing_address, 
     
     if prefix == 'cust': #Skip if vendors as they have no shipping addresses
       if entity.getElementsByTagName(prefix+':shipaddr') :
         shipaddr = entity.getElementsByTagName(prefix+':shipaddr')
         shipping_address = get_address(shipaddr)       
         print shipping_address
-    
+    continue
     eti = entity.getElementsByTagName(prefix+':taxincluded')[0] 
     print eti.firstChild.nodeValue
     ea = entity.getElementsByTagName(prefix+':active')[0] 
