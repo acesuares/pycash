@@ -33,6 +33,10 @@ From http://www.goldb.org/ystockquote.html
 
 Gets stock quotes from yahoo.  Useage info is in the file.
 
+=== get_customers_from_xml.py
+
+Get customer data from the GnuCash XML file and output in a form suitable for direct import back int GnuCash via the import plugin. It doesn't as yet work correctly for vendors, (TODO).  Works by parsing the XML file directly rather than through GnuCash's API.  Makes no changes to the source file.  Take two paramters; the file_path and a either customers or vendors (actually you can use c or v as only the first letter is required). Output is to stdout so redirect this into file as required.
+
 == Disclaimer
 
 I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.
