@@ -1,5 +1,4 @@
-#!/bin/env/python
-
+#!/usr/bin/env python
 
 '''Delete ALL the transactions in a GnuCash XML file to leave only the
 account data, invoices, customers etc.
