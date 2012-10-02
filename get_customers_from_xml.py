@@ -32,7 +32,7 @@ now = datetime.now()
 def useage():
   print "Usage:\npython get_customers_from_xml.py path_to_xml.gnucash <customers | vendors>\n\n"
 
-def get_address(addr):
+def get_address(addr, ship=False):
   ''' 
   Get either shipping or billing address
   '''
@@ -60,10 +60,12 @@ def get_address(addr):
   if addr[0].getElementsByTagName('addr:email'):  
     email = addr[0].getElementsByTagName('addr:email')[0].firstChild.nodeValue
   else: email = ''
+  address_string = ",\"" + name + "\",\"" + addr1 + "\",\"" + addr2 + "\",\"" + addr3 + "\",\"" + addr4 + "\",\"" + phone + "\",\"" + fax + "\",\"" + email  + "\""
+  if ship: return address_string
   if addr[0].getElementsByTagName('addr:notes'):  
     notes = addr[0].getElementsByTagName('addr:notes')[0].firstChild.nodeValue
   else: notes = ''
-  address_string = ",\"" + name + "\",\"" + addr1 + "\",\"" + addr2 + "\",\"" + addr3 + "\",\"" + addr4 + "\",\"" + phone + "\",\"" + fax + "\"," + email + "\",\"" + notes + "\""
+  address_string += ",\"" +  notes + "\""
   return address_string
   
 
@@ -90,14 +92,14 @@ def get_customers_vendors(c_or_v = 'customers'):
     billing_address = get_address(addr)
     
       
-    print "\"" + e_id + "\",\""+ e_name + "\"" +  billing_address, 
+    sys.stdout.write("\"" + e_id + "\",\""+ e_name + "\"" +  billing_address)
     
     if prefix == 'cust': #Skip if vendors as they have no shipping addresses
       if entity.getElementsByTagName(prefix+':shipaddr') :
         shipaddr = entity.getElementsByTagName(prefix+':shipaddr')
-        shipping_address = get_address(shipaddr)       
-        print shipping_address
-    continue
+        shipping_address = get_address(shipaddr, True)    
+        sys.stdout.write(shipping_address + "\n")
+    continue # Below here not needed for import into GnuCash
     eti = entity.getElementsByTagName(prefix+':taxincluded')[0] 
     print eti.firstChild.nodeValue
     ea = entity.getElementsByTagName(prefix+':active')[0] 
