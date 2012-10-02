@@ -39,7 +39,7 @@ Get customer data from the GnuCash XML file and output in a form suitable for di
 
 == Disclaimer
 
-I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.
+I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.  These utilities are in no way part of the official GnuCash codebase and are here for use at the users own risk.  Backups, backups, backups people. 
 
 === Notes
 
