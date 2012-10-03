@@ -43,13 +43,3 @@ I take no resposibility for data loss through the use of these utilities.  It is
 
 ### Notes
 
-Mostly for my benefit because: My mind is going. There is no question about it. I can feel it. I can feel it.
-
-Convert this to html with:
-asciidoc README
-
-Convert this to markdown with:
-cat README | sed 's/^=+=/#/g' > README.md
-
-Convert the markdown to html with:
-markdown README.md > README-md.html
