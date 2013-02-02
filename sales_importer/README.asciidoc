@@ -1,0 +1,26 @@
+= ABOUT THIS IMPORTER
+:author: Mike Evans
+:Email:     mikee@saxicola.co.uk, mikee@code.gnucash.org
+:Date:      2013-02-02
+:Revision:  2013020201
+
+Recording a cash sale in GnuCash can be a very time consuming and error prone process.  The seller usually has some record of sales in a spradsheet or CSV format that should easily be importable into GnuCash.  Using a python script to achieve this is relatively easy to do ptoviding the account tree is set up as the python script expects.  This is file for programmers and other "power users" but the average shop owner doesn't know and doesn't care to knoe about installing python in Windows or Linux then running a script, ensuring that GnuCash isn't running than opening... 
+
+What they want is a simple importer so they can click on the day's sales file and import verything into the correct accounts to keep them, their accountant and the taxman happy.  This is intended to do that.
+
+== Data Format and mapping.
+
+The user should be able to define  which account each column is mapped to.  A suggested sales csv file will take the following format:
+----
+DATE, DESCRIPTION, QTY, EA_AMNT_INC_TAX, EA_AMNT_BEFORE_TAX, TAX@20. TAX@5, TAX@0, ...
+----
+
+Column Descriptions are pretty obvious except maybe for the tax columns.  In the UK Value Added Tax (VAT) is added to sales at differing rates depending on the commodity.  Most items currently attract 20% VAT, raw food and childreans clothes are rates at 0%, domestic gas is 5%.  Other taxes are levied on beer, spirits, petrol, diesel, etc.  In other words all columns can be mapped to any account.  Most countries will have similarly complicated tax levys and the complete list is obtainable from your local tax authority.  All of these will have to be mapped to the account tree.  Since this is aimed at cash sales only, any customer data are not included.  Once mapped, the mapping should be saved across restarts.
+
+It is intended that the code be based on the current (2.4) CSV importer with additional dialogs to set up field->account mapping.
+
+== Coding
+
+HELP!  Well OK I can probably cope with most of it but if anyone want's to chip in with help please do.
+
+This will likely be a long term project it it's just me coding, in the meantime I will probably come up with a python script to import sales which I will make available somewhere.  And this is it!!!
