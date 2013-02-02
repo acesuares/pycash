@@ -1,0 +1,45 @@
+= PyCash
+
+A selection of poorly written Python programs using GnuCash Python bindings.  I know they're all a mess but I was just using them to learn the python bindings to GnuCash.  Some of it may be useful to someone though so here they are.
+
+==  What's in Here?
+
+Some Python utilites that GnuCash users may find useful.
+
+=== delete_ALL_transactions.py
+
+Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the busuness data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.
+
+=== make_invoice.py
+
+Creates an invoice using the next available serial number.  Currently the invoice contents are hard coded n the file and is very much test code than a practical program.  Modify it suit your needs.
+
+=== make_sale.py
+
+Add a sale directly to the register in Sales.  A mess of code used for testing the principal of creating sales transactions.  I originally planned to take data from an e-shop and auto-populate GnuCash with the sales data.  Unfinished, modify to your needs.
+
+=== PriceDB_test.py
+
+Just gets and prints the latest price for a stock from the GnuCash price DB.
+
+=== PriceDB_test-02.py
+
+I got this off the WWW somewhere and now I forget why and what it does exactly.  Perhaps someone can enlighten me.  Information is in the file header.
+
+
+=== ystockquote.py
+
+From http://www.goldb.org/ystockquote.html
+
+Gets stock quotes from yahoo.  Useage info is in the file.
+
+=== get_customers_from_xml.py
+
+Get customer data from the GnuCash XML file and output in a form suitable for direct import back int GnuCash via the import plugin. It doesn't as yet work correctly for vendors, (TODO).  Works by parsing the XML file directly rather than through GnuCash's API.  Makes no changes to the source file.  Take two paramters; the file_path and a either customers or vendors (actually you can use c or v as only the first letter is required). Output is to stdout so redirect this into file as required.
+
+== Disclaimer
+
+I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.  These utilities are in no way part of the official GnuCash codebase and are here for use at the users own risk.  Backups, backups, backups people. 
+
+=== Notes
+
