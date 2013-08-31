@@ -36,7 +36,8 @@ Some fields are compulsory: id, vendor_id, action, quantity, price, taxable
 import sys
 import csv
 
-VENDOR_ID="000013" # Obviously this needs to match your vendor ID
+VENDOR_ID="000013" # Obviously this needs to match your vendor ID for this supplier
+
 try:
 	INFILE=sys.argv[1]
 except:
@@ -59,8 +60,8 @@ Reader = csv.reader(open(INFILE), delimiter=',')
 # Need to ignore 1st and last rows.
 
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
-sep=',' # Field separator.
-money = "£"
+SEP = ',' # Field separator.
+MONEY = "£"
 
 # Make sure that field 5 is a numeric field by detecting £ sign
 # This can occur if the download has errant separator chars in descriptions
@@ -68,27 +69,26 @@ money = "£"
 
 for row in Reader:
 	if row[0].isdigit(): # We only use numbered lines
-		for 
-		
-		row[3] = row[3].replace(",", ";")
-		if not "£" in row[5]: # Concat previous two fields
+		# If field 5 is not money then we have errant separators somewhere, 
+		# so just concat the previous field until we do.
+		while not "£" in row[5]:
 			row[4] =  row[4] + row[5]
-			row[4] = row[4].replace(",", ";")
-		outline=(INV_ID + sep*2 + VENDOR_ID + sep*4 + row[1] + " > " + row[4] + sep + "ea" + sep +
-			ACCOUNT + sep + row[2] + sep + row[5].replace("£", "") + sep*4 + "no" + sep*8)
+		row[4] = row[4].replace(SEP, ":")
+		outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + row[1] + " > " + row[4] + SEP + "ea" + SEP +
+			ACCOUNT + SEP + row[2] + SEP + row[5].replace(MONEY, "") + SEP*4 + "no" + SEP*8)
 		print outline
 
 # Deal with the footer rows		
-	elif not row[0]: # We only need the VAT row.
-		
+	elif not row[0]: # We only need the VAT row and Postage
 		if footerRow == 1: 
-			delivery = row[7].replace("£", "")
-			outline=(INV_ID + sep*2 + VENDOR_ID + sep*4 + "DELIVERY" + sep + "ea" + sep +
-			"Expenses:Postage and Delivery" + sep + "1" + sep + delivery +  "no" + sep*8)
+			delivery = row[7].replace(MONEY, "")
+			outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + "DELIVERY" + SEP + "ea" + SEP +
+			"Business Expenses:Postage and Delivery" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*8)
 			print outline # pipe to file for GnuCash import
 		if footerRow == 2: 
-			vat = row[7].replace("£", "")
-			outline=(INV_ID + sep*2 + VENDOR_ID + sep*4 + "VAT" + sep +"tax" +sep +
-			"Expenses:VAT" + sep + "1" + sep + vat +  "no" + sep*8)
+			vat = row[7].replace(MONEY, "")
+			outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + "VAT" + SEP +"tax" +SEP +
+			"Business Expenses:VAT" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*8)
 			print outline # pipe to file for GnuCash import
-		footerRow+= 1
+		footerRow += 1
+
