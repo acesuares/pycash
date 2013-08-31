@@ -63,10 +63,6 @@ footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Gra
 SEP = ',' # Field separator.
 MONEY = "£"
 
-# Make sure that field 5 is a numeric field by detecting £ sign
-# This can occur if the download has errant separator chars in descriptions
-
-
 for row in Reader:
 	if row[0].isdigit(): # We only use numbered lines
 		# If field 5 is not money then we have errant separators somewhere, 
