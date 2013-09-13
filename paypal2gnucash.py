@@ -1,7 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*- 
 # Take input from a PayPal activity download and produce something suitable for
-# import into GnuCash.  Redirect the output to file with >
+# import into GnuCash.  Produces a tab delimited file, redirect the output 
+# to a file with > then import CSV.
 
 import os
 from os import path
