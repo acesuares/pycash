@@ -8,7 +8,7 @@ Some Python utilites that GnuCash users may find useful.
 
 === delete_ALL_transactions.py
 
-Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the busuness data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.
+Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the business data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.  WARNING this alters your GnuCash file directly and is non-reversable, once it's gone it's gone.  Direct editing of the GnuCash file is not endorsed by GnuCash.  ALWAYS MAKE A BACKUP before runnning this or ANY of the scripts here.
 
 === make_invoice.py
 
