@@ -65,7 +65,7 @@ def gnc_numeric_from_decimal(decimal_value):
 
 # Very basic try for database opening.
 try:
-  session = Session('/home/mikee/Docs/MEC/gnucash/MEC-test', True, False, False)
+  session = Session('/home/mikee/Docs/MEC/gnucash/MEC-test.gnucash', True, False, False)
 except GnuCashBackendException:
   print "ERROR:  Cannot create session.  Quitting.  Do have GnuCash open?"
   quit()
