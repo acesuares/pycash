@@ -11,7 +11,7 @@
  We need to set gnucash-env before running this
  Run with 
  and Gnucash which has fixed python bindings :)
- ~/progs/gnucash-trunk/bin/gnucash-env ./gnucash_bitcoin_invoice.py invoice_number gnucash_file
+ ~/progs/gnucash-trunk/bin/gnucash-env ./goods_sale_invoice.py invoice_number gnucash_file
  Edit the __main__ section to add a default GnuCash file.
  Better yet, improve the whole thing, do a pull request and send me some beer 
  money to say thankyou.
@@ -117,6 +117,23 @@ def open_invoice(book,inv_num):
     try: invoice = book.InvoiceLookupByID(inv_num)
     except: return None
     return invoice
+
+def create_qr_code(invoice_id, invoice_total ,exch_rate):
+    qr_data = 'bitcoin:' \
+        + get_bitcoin_address('Work Done')[0] \
+        + '?amount=' + str(round(invoice_total/exch_rate,8)) \
+        + "&label=" + get_bitcoin_address('Work Done')[1] # FIXME: Search term shouldn't be hard coded here
+    qr = qrencode.encode(qr_data)
+    # Rescale using the size and add a 1 px border
+    size = qr[1]
+    qr = qrencode.encode_scaled(qr_data, (size*4))
+    img = qr[2] #'invoice-' + str(invoice_id) +'.png'
+    img.save('qr.png', 'png')
+    
+    
+    # remove temporary files
+    os.remove('qr.png')
+    os.remove("invoice-" + str(invoice_id) + ".html")
     
 def create_printable_invoice(invoice):
     # Prep the document
@@ -130,7 +147,7 @@ def create_printable_invoice(invoice):
     exch_rate = get_latest_price()
     invoice_id =  invoice.GetID()
     notes = invoice.GetNotes()
-    invoice_type = invoice.GetTypeString()
+    #invoice_type = invoice.GetTypeString()
     date_posted = invoice.GetDatePosted()
     date_due = invoice.GetDateDue()
     invoice_total = invoice.GetTotal().to_double()
@@ -207,43 +224,28 @@ def create_printable_invoice(invoice):
                     'postage':postage_total}
                     
     # Now create a QR code
-    qr_data = 'bitcoin:' \
-        + get_bitcoin_address('Work Done')[0] \
-        + '?amount=' + str(round(invoice_total/exch_rate,8)) \
-        + "&label=" + get_bitcoin_address('Work Done')[1] # FIXME: Search tem shouldn't be hard coded here
-    qr = qrencode.encode(qr_data)
-    # Rescale using the size and add a 1 px border
-    size = qr[1]
-    qr = qrencode.encode_scaled(qr_data, (size*4))
-    img = qr[2] #'invoice-' + str(invoice_id) +'.png'
-    img.save('foo.png', 'png')
-    
+    if bitcoins == True: create_qr_code(invoice_id, invoice_total ,exch_rate)
     # Render the HTML
     outputText = template.render( template_vars )
-    
     # to save the results
     import codecs
     file = codecs.open("invoice-" + str(invoice_id) + ".html", "w", "utf-8")
     file.write(outputText)
     file.close()
     pdfkit.from_string(outputText, 'invoice-' + str(invoice_id) +'.pdf')
-    os.remove('foo.png')
-    os.remove("invoice-" + str(invoice_id) + ".html")
-
     
 # Test code
 if __name__ == "__main__":
     try: invoice_num = str(sys.arv[1])
     except: invoice_num = "000133" # For testing
     try: account_file = str(sys.argv[2])
-    except: account_file="../bitcoin/example.gnucash" # For testing
+    except: account_file="../../bitcoin/example.gnucash" # For testing
     print "Latest Bitcoin->GBP =", str(get_latest_price())
     session, book = open_book(account_file)
     invoice = open_invoice(book,invoice_num) # A multi-line invoice
     create_printable_invoice(invoice)
     close_session(session, False) # Close session but don't save
-    # We don't need the QR image or the html any more
-    # So we should probably delete them here.
+
 
     
     
