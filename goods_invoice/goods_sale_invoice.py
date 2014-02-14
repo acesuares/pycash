@@ -61,8 +61,9 @@ def get_bitcoin_address(search_string = ''):
     @param Description string of bitcoin address
     @return The required address and the tranformed search string
     '''
-    #Need to insert %20 for space in search string.
-    search = search_string.replace (" ", "%20")
+    # Need to fix URL string.
+    import urllib
+    search = urllib.quote(search_string)
     try: f = open(home + MULTIBIT, 'r')
     except:
         print "Can't find MultiBit directory in rour home directory."
