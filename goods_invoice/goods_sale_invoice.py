@@ -82,7 +82,7 @@ def get_bitcoin_address(search_string = ''):
     
 
 def get_latest_price():
-
+    
     req = urllib2.Request(mtgox_url)
     res = urllib2.urlopen(req)
     price = json.load(res)['data']['buy']['value']
@@ -119,6 +119,9 @@ def open_invoice(book,inv_num):
     return invoice
 
 def create_qr_code(invoice_id, invoice_total ,exch_rate):
+    '''
+    Create and save a QR code.
+    '''
     qr_data = 'bitcoin:' \
         + get_bitcoin_address('Work Done')[0] \
         + '?amount=' + str(round(invoice_total/exch_rate,8)) \
@@ -129,11 +132,7 @@ def create_qr_code(invoice_id, invoice_total ,exch_rate):
     qr = qrencode.encode_scaled(qr_data, (size*4))
     img = qr[2] #'invoice-' + str(invoice_id) +'.png'
     img.save('qr.png', 'png')
-    
-    
-    # remove temporary files
-    os.remove('qr.png')
-    os.remove("invoice-" + str(invoice_id) + ".html")
+
     
 def create_printable_invoice(invoice):
     # Prep the document
@@ -233,6 +232,11 @@ def create_printable_invoice(invoice):
     file.write(outputText)
     file.close()
     pdfkit.from_string(outputText, 'invoice-' + str(invoice_id) +'.pdf')
+    # remove temporary files
+    try: 
+        os.remove('qr.png')
+        os.remove("invoice-" + str(invoice_id) + ".html")
+    except: pass
     
 # Test code
 if __name__ == "__main__":
