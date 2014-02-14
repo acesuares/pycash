@@ -211,7 +211,8 @@ def create_printable_invoice(invoice):
     # TODO: Notes, payment details
 
     # Build the html page
-    bitcoins = True # or False :)
+    bitcoins = False # True or False, depemdimng if you want bitcoin stuff on your invoice
+    
     template_vars = { "invoice_id":invoice_id, "customer_name":customer_name,
                    "date_due":date_due,"date_posted":date_posted,"zipped":zipped,
                     "due":invoice_total,"btc_due":round(invoice_total/exch_rate,8),

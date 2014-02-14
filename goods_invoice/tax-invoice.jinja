@@ -213,10 +213,12 @@ Robbing Bastards Bank</br>
 Anytown branch</br>
 20-00-00</br>
 12345678</p>
+{% if bitcoins %}
 <p>Make BitCoin payments by either scanning the QRCode.</p>
 <img src="{{cwd}}qr.png"></br></br>
 Or use the BitCoin address: {{bitcoin_address}}
 </p>
+{% endif %}
 <p>Thank you for your custom.</p>
 </div>
 </body>
