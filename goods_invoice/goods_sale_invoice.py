@@ -52,7 +52,7 @@ TEMPLATE_FILE = "tax-invoice.jinja"
 template = templateEnv.get_template( TEMPLATE_FILE )
 MULTIBIT = '/MultiBit/multibit.info'
 mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast"
-
+bitcoins = False # True or False. Do you want bitcoin stuff on your invoice
 
 
 def get_bitcoin_address(search_string = ''):
@@ -211,7 +211,7 @@ def create_printable_invoice(invoice):
     # TODO: Notes, payment details
 
     # Build the html page
-    bitcoins = False # True or False, depemdimng if you want bitcoin stuff on your invoice
+    
     
     template_vars = { "invoice_id":invoice_id, "customer_name":customer_name,
                    "date_due":date_due,"date_posted":date_posted,"zipped":zipped,
