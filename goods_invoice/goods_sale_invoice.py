@@ -54,7 +54,7 @@ MULTIBIT = '/MultiBit/multibit.info'
 mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast"
 bitcoins = False # True or False. Do you want bitcoin stuff on your invoice
 
-
+#-------------------------------------------------------------------------------
 def get_bitcoin_address(search_string = ''):
     '''
     this assumes you wallet is stored in ~/Multibit
@@ -80,14 +80,15 @@ def get_bitcoin_address(search_string = ''):
             
         
     
-
+#-------------------------------------------------------------------------------
 def get_latest_price():
     
     req = urllib2.Request(mtgox_url)
     res = urllib2.urlopen(req)
     price = json.load(res)['data']['buy']['value']
     return float(price)
-
+    
+#-------------------------------------------------------------------------------
 def open_book(account_file):
     '''
     Open a GnuCash file and load the invoice
@@ -99,7 +100,8 @@ def open_book(account_file):
     root = session.book.get_root_account()
     book = session.book
     return session, book
-    
+ 
+#-------------------------------------------------------------------------------
 def close_session(session, save):
     '''
     @session gnucash.Session
@@ -109,6 +111,7 @@ def close_session(session, save):
     session.end()
     session.destroy()
 
+#-------------------------------------------------------------------------------
 def open_invoice(book,inv_num):
     '''
     @param book.
@@ -118,9 +121,13 @@ def open_invoice(book,inv_num):
     except: return None
     return invoice
 
+#-------------------------------------------------------------------------------
 def create_qr_code(invoice_id, invoice_total ,exch_rate):
     '''
     Create and save a QR code.
+    @param invoice_id
+    @param invoice_total
+    @param exch_rate
     '''
     qr_data = 'bitcoin:' \
         + get_bitcoin_address('Work Done')[0] \
@@ -133,7 +140,7 @@ def create_qr_code(invoice_id, invoice_total ,exch_rate):
     img = qr[2] #'invoice-' + str(invoice_id) +'.png'
     img.save('qr.png', 'png')
 
-    
+#-------------------------------------------------------------------------------
 def create_printable_invoice(invoice):
     # Prep the document
     
@@ -238,7 +245,8 @@ def create_printable_invoice(invoice):
         os.remove('qr.png')
         os.remove("invoice-" + str(invoice_id) + ".html")
     except: pass
-    
+
+#-------------------------------------------------------------------------------
 # Test code
 if __name__ == "__main__":
     try: invoice_num = str(sys.arv[1])
