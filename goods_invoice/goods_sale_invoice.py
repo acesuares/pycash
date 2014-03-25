@@ -21,6 +21,7 @@
  and
  pdfkit from  https://pypi.python.org/pypi/pdfkit
  TODO:  Fix Mt Gox problem.
+ https://bitcoinaverage.com/api.htm
 '''
 
 import sys, os
@@ -52,6 +53,7 @@ templateEnv = jinja2.Environment( loader = templateLoader )
 TEMPLATE_FILE = "tax-invoice.jinja"
 template = templateEnv.get_template( TEMPLATE_FILE )
 MULTIBIT = '/MultiBit/multibit.info'
+bitcoinaverage_url = "https://api.bitcoinaverage.com/ticker/global/GBP/"
 mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast" # Mt Gox no longer exists!
 bitcoins = False # True or False. Do you want bitcoin stuff on your invoice
 
@@ -84,10 +86,10 @@ def get_bitcoin_address(search_string = ''):
 #-------------------------------------------------------------------------------
 def get_latest_price():
     
-    req = urllib2.Request(mtgox_url)
+    req = urllib2.Request(bitcoinaverage_url)
     res = urllib2.urlopen(req)
-    price = json.load(res)['data']['buy']['value']
-    return float(price)
+    price = json.load(res) #['ask']['bid']['last']
+    return float(price['bid'])
     
 #-------------------------------------------------------------------------------
 def open_book(account_file):
