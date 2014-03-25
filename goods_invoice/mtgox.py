@@ -1,4 +1,4 @@
-
+# TODO MtGox no longer exists.
 from urllib import urlencode
 import urllib2
 import time

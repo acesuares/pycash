@@ -20,6 +20,7 @@
  wkhtmltopdf from repos or sources 
  and
  pdfkit from  https://pypi.python.org/pypi/pdfkit
+ TODO:  Fix Mt Gox problem.
 '''
 
 import sys, os
@@ -51,7 +52,7 @@ templateEnv = jinja2.Environment( loader = templateLoader )
 TEMPLATE_FILE = "tax-invoice.jinja"
 template = templateEnv.get_template( TEMPLATE_FILE )
 MULTIBIT = '/MultiBit/multibit.info'
-mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast"
+mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast" # Mt Gox no longer exists!
 bitcoins = False # True or False. Do you want bitcoin stuff on your invoice
 
 #-------------------------------------------------------------------------------
