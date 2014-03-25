@@ -11,7 +11,7 @@
  We need to set gnucash-env before running this
  Run with 
  and Gnucash which has fixed python bindings :)
- ~/progs/gnucash-trunk/bin/gnucash-env ./goods_sale_invoice.py invoice_number gnucash_file
+ ~/progs/gnucash-master/bin/gnucash-env ./goods_sale_invoice.py invoice_number gnucash_file
  Edit the __main__ section to add a default GnuCash file.
  Better yet, improve the whole thing, do a pull request and send me some beer 
  money to say thankyou.
@@ -96,7 +96,7 @@ def open_book(account_file):
     '''
     Open a GnuCash file and load the invoice
     '''
-    try: session = Session("xml://%s" % account_file, False, False, False)
+    try: session = Session("xml://%s" % account_file, True, False, False)
     except:
         print ' Failed to open GnuCash file.  Please check and try again/'
         quit(0)
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     try: invoice_num = str(sys.arv[1])
     except: invoice_num = "000133" # For testing
     try: account_file = str(sys.argv[2])
-    except: account_file="../../bitcoin/example.gnucash" # For testing
+    except: account_file="/home/mikee/Projects/bitcoin/example.gnucash" #../../bitcoin/example.gnucash" # For testing
     print "Latest Bitcoin->GBP =", str(get_latest_price())
     session, book = open_book(account_file)
     invoice = open_invoice(book,invoice_num) # A multi-line invoice
