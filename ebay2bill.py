@@ -37,12 +37,12 @@ import pycash
 #import gnucash.gnucash_business
 
 class EbayBill():
-    items = [] # list
+    items = {} # list
+    sellers = {}
     item = {} # Dictionary
-    seller = {} # Seller data
+    seller = {} # Seller data. Use seller.update({'xxx':'xxxxx'}) to add stuff
     
-    search_terms=("Seller:", # Occurs once per mail and we could creat a new seller in GnuCash.
-                    "Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
+    item_search_terms=(  "Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
                     "Item number:", # 290921972162
                     "transaction::",  # 1010018076019 Use this for bill ID
                     "Price:", #  =C2=A31.45    =20
@@ -53,44 +53,52 @@ class EbayBill():
     
     def __init__(self,billmail, cashfile, account):
         
-        #session=pycash.Session(cashfile) # A gnucash session
-        #session.open()
+        #self.session=pycash.Session(cashfile) # A gnucash session
+        #self.session.open()
         self.INFILE = billmail
         self.account = account
         f = open(self.INFILE)
         msg = msg = email.message_from_file(f)
-        lines = f.readlines()
         f.close()
-        self.plane = ""
+        self.plain = ""
         for part in msg.walk():
             # each part is a either non-multipart, or another multipart message
             # that contains further parts... Message is organized like a tree
             if part.get_content_type() == 'text/plain':
-                self.plane =  part.get_payload(None, True) # Make a string of the text.
+                self.plain =  part.get_payload(None, True) # Make a string of the text.
         
-        self.parse_seller_information(self.plane)
-        self.parse_item_information(self.plane)
+        self.parse_seller_information(self.plain)
+        #self.parse_item_information(self.plain)
+        #print self.items
+        print self.sellers
         #print session.vendor_search("E Bay", 100)
-        #session.close() # Supply save=True to save on close.
+        #self.session.close() # Supply save=True to save on close.
                         
 
-    def parse_seller_information(self,plane):
-        foo = plane.split("-----------------------------------------------------------------")
+    def parse_seller_information(self,plain):
+        foo = plain.split("\n")
+        seller = ""
         #print foo
         for line in foo:   
-            idx = line.find("Seller information:")
-            if idx != -1:
-                print line
-                foo = line.split('\n')
-                for fi in foo:
-                    print "---",fi
+            if line.find("Seller:") != -1:
+                seller = line.rpartition('Seller:')[2]
+                self.seller.update({'Seller':seller}) ## Just the name. we need address
+                self.sellers.update({seller:self.seller})
+            for needle in self.item_search_terms:
+                if line.find(needle) != -1:
+                    self.item.update({line.rpartition(needle)[1].strip(':'):\
+                        line.rpartition(needle)[2].lstrip(' ').decode('ascii','ignore').encode('utf8')})
+                    self.needle_found(needle, line)
+                self.items.update({seller:self.item})
+  
                     
 
     def needle_found(self, needle, line):
         ''' Get the data part of the line; '''
         print  needle, line.rpartition(needle)[2]
         f = open("ebay2cash.log","a")
-        f.write(line.rpartition(needle)[2])
+        f.write(line.rpartition(needle)[1]) # The partition string
+        f.write(line.rpartition(needle)[2]) # The data
         f.write("\n")
         f.close()
         #if needle == "Item name":
@@ -104,10 +112,10 @@ class EbayBill():
         session.close()    
         return
 
-    def parse_item_information(self,plane):
-        foo = plane.split('\n')
+    def parse_item_information(self,plain):
+        foo = plain.split('\n')
         for line in foo:
-            for needle in self.search_terms:
+            for needle in item_self.search_terms:
                 idx = line.find(needle)
                 if idx != -1:
                     self.needle_found(needle, line)
