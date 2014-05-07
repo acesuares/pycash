@@ -6,30 +6,16 @@
 # In my case these are always paid using PayPal so consider them paid.
 # The transfer account varias though so perhaps don't.
 # The relevent part looks like:
-'''
-Item name  Acer Aspire 5520 ICW50 5720 5315 5715 Webcam Camera Module
-Item URL:  http://rover.ebay.com/rover/0/e11401.m1842.l3160/7?euid=ae9d4293bf13401583ed51cb7fa10c8c&loc=http%3A%2F%2Fcgi.ebay.co.uk%2Fws%2FeBayISAPI.dll%3FViewItem%26item%3D171266857661%26ssPageName%3DADME%3AL%3AOU%3AGB%3A3160&exe=10014&ext=100027sojTags=exe=exe,ext=ext
-Item number:  171266857661
-transaction::  1202476642007
-Price:  £1.97     
-P&amp;P price:  Free
-Quantity:  1
-Item total:  £1.97
-Paid on 03-May-14Dispatched on  06-May-14 
-Royal Mail 1st Class
- Estimated delivery:  Wed. 7 May.
-
------------------------------------------------------------------
------------------------------------------------------------------
-Email reference id: [#ae9d4293bf13401583ed51cb7fa10c8c#]
------------------------------------------------------------------
-'''
+# See mail.txt for a complicated example.
 # Use transaction as the bill ID as then we can trace these back, perhaps prepend ebay-
 
 import sys
 import csv
 import email
 import pycash
+import json
+import copy
+
 
 # Add the Gnucash Python stuff
 #sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
@@ -37,10 +23,10 @@ import pycash
 #import gnucash.gnucash_business
 
 class EbayBill():
-    items = {} # list
+    items = [] # list
     sellers = {}
-    item = {} # Dictionary
-    seller = {} # Seller data. Use seller.update({'xxx':'xxxxx'}) to add stuff
+    #item = [] # List not Dictionary
+    #seller = {} # Seller data. Use seller.update({'xxx':'xxxxx'}) to add stuff
     
     item_search_terms=(  "Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
                     "Item number:", # 290921972162
@@ -69,8 +55,10 @@ class EbayBill():
         
         self.parse_seller_information(self.plain)
         #self.parse_item_information(self.plain)
-        #print self.items
-        print self.sellers
+        
+        print json.dumps(self.sellers,sort_keys=True, indent=4)
+        print json.dumps(self.items,sort_keys=True, indent=4)
+    
         #print session.vendor_search("E Bay", 100)
         #self.session.close() # Supply save=True to save on close.
                         
@@ -79,18 +67,23 @@ class EbayBill():
         foo = plain.split("\n")
         seller = ""
         #print foo
+        item_dict = {}
         for line in foo:   
             if line.find("Seller:") != -1:
-                seller = line.rpartition('Seller:')[2]
-                self.seller.update({'Seller':seller}) ## Just the name. we need address
-                self.sellers.update({seller:self.seller})
-            for needle in self.item_search_terms:
-                if line.find(needle) != -1:
-                    self.item.update({line.rpartition(needle)[1].strip(':'):\
-                        line.rpartition(needle)[2].lstrip(' ').decode('ascii','ignore').encode('utf8')})
-                    self.needle_found(needle, line)
-                self.items.update({seller:self.item})
-  
+                seller_dict = {}
+                seller = line.rpartition('Seller:')[2].lstrip(' ')
+                #seller_dict.update({'Seller':seller}) ## Just the name. we need address
+                seller_dict.update({'Addr1':seller}) # Dummy address
+                seller_dict.update({'Addr2':"2 Addr Dummy"}) # Dummy address
+                self.sellers.update({seller:seller_dict}) # Add to the sellers dict
+            else:
+                for needle in self.item_search_terms:
+                    if line.find(needle) != -1:
+                        item_dict.update({line.rpartition(needle)[1].strip(':'):\
+                            line.rpartition(needle)[2].lstrip(' ').decode('ascii','ignore').encode('utf8')})
+        self.items.append({seller.lstrip(' '):copy.deepcopy(item_dict)})
+        item_dict.clear()
+
                     
 
     def needle_found(self, needle, line):
@@ -115,7 +108,7 @@ class EbayBill():
     def parse_item_information(self,plain):
         foo = plain.split('\n')
         for line in foo:
-            for needle in item_self.search_terms:
+            for needle in self.item_search_terms:
                 idx = line.find(needle)
                 if idx != -1:
                     self.needle_found(needle, line)
