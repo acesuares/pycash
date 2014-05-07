@@ -56,8 +56,8 @@ class Session():
                     return  name_string, search_string
             search_id += 1
         
-        def invoice_search(): # this can also be a bill
-            return
+        def invoice_search(self,name_string, max_id): # this can also be a bill
+            vendor_search(name_string, max_id)
             
         def make_new_vendor(vendor_name, address1="The Internet"):
             new_vendor = gnucash.gnucash_business.Vendor(self.book,self.book.VendorNextID(),self.gbp)
@@ -130,6 +130,26 @@ class Entry():
         
         return
         
+class Address():
+    '''
+    add.BeginEdit                                add.SetAddr2
+    add.ClearDirty                               add.SetAddr3
+    add.CommitEdit                               add.SetAddr4
+    add.Compare                                  add.SetEmail
+    add.Create                                   add.SetFax
+    add.Destroy                                  add.SetName
+    add.Equal                                    add.SetPhone
+    add.GetAddr1                                 add.add_constructor_and_methods_with_prefix
+    add.GetAddr2                                 add.add_method
+    add.GetAddr3                                 add.add_methods_with_prefix
+    add.GetAddr4                                 add.decorate_functions
+    add.GetEmail                                 add.do_lookup_create_oo_instance
+    add.GetFax                                   add.get_instance
+    add.GetName                                  add.instance
+    add.GetPhone                                 add.ya_add_classmethod
+    add.IsDirty                                  add.ya_add_method
+    add.SetAddr1                                 
+    ''' 
     
     
     
