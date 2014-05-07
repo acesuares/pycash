@@ -20,19 +20,21 @@
 # Run this on a TEST database as it will insert an invoice into your system, this
 # may not be what you want.
 
+import os
+import sys
+sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
+
 import backend_errors
 import gnucash
 import gnucash.gnucash_business
-#from gnucash import *
-from gnucash.gnucash_core_c import *
-from gnucash.gnucash_business import *
-from gnucash.gnucash_core import *
-import os
-import sys
+
+
 from datetime import date
 from decimal import Decimal
 for arg in sys.argv:
     print arg # Or, more realistically assign them to our constants
+    
+
 
 BANK_ACC = ''
 SALES_ACC = ''
