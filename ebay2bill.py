@@ -29,8 +29,15 @@ Email reference id: [#ae9d4293bf13401583ed51cb7fa10c8c#]
 import sys
 import csv
 import email
+import gnucash_invoice as bill
 
-VENDOR_ID="000013" # Obviously this needs to match your vendor ID for this supplier
+# Add the Gnucash Python stuff
+sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
+import gnucash
+import gnucash.gnucash_business
+
+
+VENDOR_ID="000019" # All ebay stuff in here.
 
 try:
 	INFILE=sys.argv[1]
@@ -50,10 +57,10 @@ Reader = csv.reader(open(INFILE), delimiter=',')
 
 MONEY = "£"
 
-search_terms=("Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
-# lass Post # Yep there's a fucking line break in there.
+search_terms=("Seller:", # Occurs once per mail and we could creat a new seller in GnuCash.
+             "Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
             "Item number:", # 290921972162
-            "transaction::",  # 1010018076019
+            "transaction::",  # 1010018076019 Use this for bill ID
             "Price:", #  =C2=A31.45    =20
             "P&amp;P price:", #  P&P £30.99
             "Quantity:", #  1
@@ -65,30 +72,50 @@ msg = msg = email.message_from_file(f)
 lines = f.readlines()
 f.close()
 
+
 plane = ""
 for part in msg.walk():
         # each part is a either non-multipart, or another multipart message
         # that contains further parts... Message is organized like a tree
         if part.get_content_type() == 'text/plain':
-                plane +=  part.get_payload(None, True) # prints the raw text
+                plane =  part.get_payload(None, True) # Make a string of the text.
+                
 
-plane = plane.split("\n")
-
+def parse_seller_information(plane):
+    foo = plane.split("-----------------------------------------------------------------")
+    for line in foo:
+        for needle in search_terms:
+            idx = line.find(needle)
+            if needle == "Seller information:" and idx != -1:
+                #print line
+                foo = line.split('\n')
+                for fi in foo:
+                    print "---",fi
+                
+    
 
 def needle_found(needle, line):
     ''' Get the data part of the line; '''
     print  needle, line.rpartition(needle)[2]
+    f = open("ebay2cash.log","a")
+    f.write(line.rpartition(needle)[2])
+    f.write("\n")
+    f.close()
     #if needle == "Item name":
     return
     
 def make_invoice():
     
     return
-    
-    
-    
-for line in plane:
-    for needle in search_terms:
-        idx = line.find(needle)
-        if idx != -1:
-            needle_found(needle, line)
+
+def parse_item_information(plane):
+    foo = plane.split('\n')
+    for line in foo:
+        for needle in search_terms:
+            idx = line.find(needle)
+            if idx != -1:
+                needle_found(needle, line)
+
+parse_seller_information(plane)
+parse_item_information(plane)
+
