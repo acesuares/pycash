@@ -18,10 +18,7 @@ import copy
 
 class Vendor:
     name = ''
-    addr1 = ''
-    addr2 = ''
-    addr3 = ''
-    addr4 = ''
+    addr = []
     email = ''
     items = [] # List of items from this vendor.
         
@@ -61,6 +58,11 @@ class Vendor:
     def add_item(self, item):
         self.items.append(item)
         
+    def print_vendor(self):
+        print self.name
+        for add in self.addr:
+            print add
+        
 
         
 ###### END CLASS VENDOR ########
@@ -68,14 +70,6 @@ class Vendor:
 
 class Item:
     items = {} # Dict
-    '''name=''
-    number=''
-    transaction=''
-    price = 0.0
-    pnp = 0.0
-    quantity = 0
-    total = 0
-    paid_on = '' '''
     item_search_terms=( "Item name", #
                         "Item number:", #
                         "transaction::",  #
@@ -86,61 +80,69 @@ class Item:
                         "Paid on")  #
     
     def __init__(self, item_data):
-        #print  '\n\n',item_data
         self.parse_item_information(item_data)
         
     def parse_item_information(self,plain):
-        #print '\n\n', plain
         for line in plain:
             for needle in self.item_search_terms:
                 if line.find(needle) != -1:
                     var = line.rpartition(needle)[2].lstrip(' ')
-                    #print needle, var
                     self.items[needle.strip(':')] = var
-                    #print line
-        print self.items
         return
+        
+    def print_items(self):
+        for item in self.items:
+            print item
         
 #### END CLASS ITEM #######
                     
 
 
 
-class Sale:
-    ''' A sale is a purchase from a single vendor and may be one or more items.
+class Purchase:
+    ''' A purchase from a single vendor and may be one or more items.
     Probably should be called purchase? 
     '''
-    items = [] # A sale has one or more items
+    items = [] # A Purchase has one or more items
     vendor = Vendor() # from a single vendor
-    def __init__(self, sale_data):
-        self.parse_sale(sale_data)
+    
+    def __init__(self, Purchase_data):
+        self.parse_vendor(Purchase_data)
+        self.parse_purchase(Purchase_data)
         
-    def parse_sale(self, data):
+    def parse_purchase(self, data):
         ''' All stuff from a single seller. '''
         idxs = []
-        #print '\n\n',data
-        #for line in plist:
         for i in range(len(data)-1):
             if data[i].find('Item name ') != -1:
                 idxs.append(i)
         idxs.append(len(data))
-        #print idxs    
         for i in range(len(idxs)-1):
             item = Item(data[idxs[i]:idxs[i+1]])
-            #print '\n\n',data[idxs[i]:idxs[i+1]]
             self.items.append(item)
             self.vendor.add_item(item)
+            
         return
         
-    def print_sale():
-        ''' Print the sale data, mostly for debugging purposes. '''
+        
+    def parse_vendor(self, data):
+        self.vendor.name=data[0].rpartition('Seller:')[2].lstrip(' ') # Always
+        for i in range(4,8):
+            if data[i][0:3] == '---': break
+            self.vendor.addr.append(data[i].lstrip(' '))
+        
+    def print_purchase(self):
+        self.vendor.print_vendor()
+        print '\n\n'
+        ''' Print the Purchase data, mostly for debugging purposes. '''
+        print '\n\n'
         return
 
-###### END CLASS SALE ########    
+###### END CLASS Purchase ########    
     
     
 class EbayBill():
-    sales = [] # List of sales in email, usually just the one but mutiples are possible.
+    purchases = [] # List of Purchases in email, usually just the one but mutiples are possible.
      
     def __init__(self,billmail, cashfile, account):
         self.INFILE = billmail
@@ -172,8 +174,9 @@ class EbayBill():
                 idxs.append(plist.index(line))
         #print idxs
         for i in range(len(idxs)-1):           
-            sale = Sale(plist[idxs[i]:idxs[i+1]])
-            self.sales.append(sale)
+            purchase = Purchase(plist[idxs[i]:idxs[i+1]])
+            purchase.print_purchase()
+            self.purchases.append(purchase)
             pass
         return   
         
