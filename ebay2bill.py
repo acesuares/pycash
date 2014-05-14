@@ -67,39 +67,42 @@ class Vendor:
 
 
 class Item:
-    name=''
+    items = {} # Dict
+    '''name=''
     number=''
     transaction=''
     price = 0.0
     pnp = 0.0
     quantity = 0
     total = 0
-    paid_on = '' 
-    item_search_terms=( "Item name", #Diffused LEDs 3mm/5mm Red,Blue,White,Green,Yellow,Orange - 1st C=
-                        "Item number:", # 290921972162
-                        "transaction::",  # 1010018076019 Use this for bill ID
-                        "Price:", #  =C2=A31.45    =20
-                        "P&amp;P price:", #  P&P £30.99
-                        "Quantity:", #  1
-                        "Item total:",  #  =C2=A31.45
-                        "Paid on")  # 26-Apr-14)#  =C2=A31.45
+    paid_on = '' '''
+    item_search_terms=( "Item name", #
+                        "Item number:", #
+                        "transaction::",  #
+                        "Price:", #
+                        "P&amp;P price:", #
+                        "Quantity:", #
+                        "Item total:",  #
+                        "Paid on")  #
+    
     def __init__(self, item_data):
-        #print item_data
+        #print  '\n\n',item_data
         self.parse_item_information(item_data)
-
         
     def parse_item_information(self,plain):
-        print '\n\n'
+        #print '\n\n', plain
         for line in plain:
             for needle in self.item_search_terms:
-                idx = line.find(needle)
-                if idx != -1:
-                    print line
+                if line.find(needle) != -1:
+                    var = line.rpartition(needle)[2].lstrip(' ')
+                    #print needle, var
+                    self.items[needle.strip(':')] = var
+                    #print line
+        print self.items
         return
         
 #### END CLASS ITEM #######
                     
-
 
 
 
@@ -115,15 +118,17 @@ class Sale:
     def parse_sale(self, data):
         ''' All stuff from a single seller. '''
         idxs = []
+        #print '\n\n',data
         #for line in plist:
-        for i in range(len(plist)-1):
-            if plist[i].find('Item name ') != -1:
+        for i in range(len(data)-1):
+            if data[i].find('Item name ') != -1:
                 idxs.append(i)
-        idxs.append(len(plist))
+        idxs.append(len(data))
         #print idxs    
         for i in range(len(idxs)-1):
-            item = Item(plist[idxs[i]:idxs[i+1]])
-            #self.items.append(item)
+            item = Item(data[idxs[i]:idxs[i+1]])
+            #print '\n\n',data[idxs[i]:idxs[i+1]]
+            self.items.append(item)
             self.vendor.add_item(item)
         return
         
@@ -165,12 +170,12 @@ class EbayBill():
             if line.find("Subtotal:") != -1:
                 #print line
                 idxs.append(plist.index(line))
-        for i in range(len(idxs)-1):
+        #print idxs
+        for i in range(len(idxs)-1):           
             sale = Sale(plist[idxs[i]:idxs[i+1]])
             self.sales.append(sale)
+            pass
         return   
-         
-               
         
     def make_invoice(self):
         session = bill.Session("example.gnucash")
@@ -179,7 +184,6 @@ class EbayBill():
         print session.vendor_search("E Bay", 100)
         session.close()    
         return
-
     
     def parse_totals(self,plain):
         
@@ -193,17 +197,16 @@ class EbayBill():
 if __name__ == "__main__":
     VENDOR_ID="000019" # All ebay stuff in here.
 
-try:
-	INFILE=sys.argv[1]
-except:
-    INFILE="example.gnucash"
+try: GNUFILE=sys.argv[1]
+except: GNUFILE="example.gnucash"
 	
-try:
-	ACCOUNT=sys.argv[2]
-except:
-	ACCOUNT="Business Expenses" # Default if absent on the command line.  Edit to suit your account tree
+try: ACCOUNT=sys.argv[2]
+except:	ACCOUNT="Business Expenses" # Default if absent on the command line.  Edit to suit your account tree
 
-ebay_bill = EbayBill('Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK...',INFILE, ACCOUNT)
+try: MAILFILE = sys.argv[3]
+except: MAILFILE = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
+    
+ebay_bill = EbayBill(MAILFILE,GNUFILE, ACCOUNT)
 plain = ebay_bill.get_plain_mail(ebay_bill.msg)
 plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
 ebay_bill.parse_mail(plist)

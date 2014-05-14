@@ -1,2 +1,3 @@
 = Take an e-bay confirmation email and create a bill in GnuCash
 
+Parses the email and creates a bill.  Any changes in the EBay mail will require changes to the scripts.
