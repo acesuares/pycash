@@ -15,6 +15,9 @@ import email
 #import pycash
 import json
 import copy
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
 
 class Vendor:
     name = ''
@@ -69,7 +72,7 @@ class Vendor:
 
 
 class Item:
-    items = {} # Dict
+    attribs = {}
     item_search_terms=( "Item name", #
                         "Item number:", #
                         "transaction::",  #
@@ -86,13 +89,16 @@ class Item:
         for line in plain:
             for needle in self.item_search_terms:
                 if line.find(needle) != -1:
-                    var = line.rpartition(needle)[2].lstrip(' ')
-                    self.items[needle.strip(':')] = var
-        return
+                    self.attribs[needle.strip(':')] = line.rpartition(needle)[2].lstrip(' ')
+                    
         
     def print_items(self):
-        for item in self.items:
-            print item
+        #print self.attribs.items()
+        for key, value in self.attribs.items():
+            print key, '->', value
+    
+    def get_attribs(self):
+        return attribs
         
 #### END CLASS ITEM #######
                     
@@ -106,12 +112,13 @@ class Purchase:
     items = [] # A Purchase has one or more items
     vendor = Vendor() # from a single vendor
     
-    def __init__(self, Purchase_data):
-        self.parse_vendor(Purchase_data)
-        self.parse_purchase(Purchase_data)
-        
+    def __init__(self, purchase_data):
+        #logging.info("Purchase\n\n%s",str(purchase_data)) ## DEBUG
+        self.parse_vendor(purchase_data)
+        self.parse_purchase(purchase_data)
+        #self.print_purchase() # DEBUG
+                
     def parse_purchase(self, data):
-        ''' All stuff from a single seller. '''
         idxs = []
         for i in range(len(data)-1):
             if data[i].find('Item name ') != -1:
@@ -120,8 +127,9 @@ class Purchase:
         for i in range(len(idxs)-1):
             item = Item(data[idxs[i]:idxs[i+1]])
             self.items.append(item)
-            self.vendor.add_item(item)
-            
+            print'\n\n'
+            item.print_items()
+            #self.vendor.add_item(item)            
         return
         
         
@@ -129,14 +137,21 @@ class Purchase:
         self.vendor.name=data[0].rpartition('Seller:')[2].lstrip(' ') # Always
         for i in range(4,8):
             if data[i][0:3] == '---': break
-            self.vendor.addr.append(data[i].lstrip(' '))
+            self.vendor.addr.append(data[i].lstrip(' ').rstrip(' '))
         
     def print_purchase(self):
+        print '\nVendor Data:'
         self.vendor.print_vendor()
-        print '\n\n'
-        ''' Print the Purchase data, mostly for debugging purposes. '''
-        print '\n\n'
+        print '\nItem data:'
+        for item in self.items:
+            item.print_items()
         return
+        
+    def get_items(self):
+        return self.items
+        
+    def get_vendor(self):
+        return self.vendor
 
 ###### END CLASS Purchase ########    
     
@@ -172,18 +187,16 @@ class EbayBill():
             if line.find("Subtotal:") != -1:
                 #print line
                 idxs.append(plist.index(line))
-        #print idxs
+        #logging.info(str(idxs))
         for i in range(len(idxs)-1):           
             purchase = Purchase(plist[idxs[i]:idxs[i+1]])
-            purchase.print_purchase()
             self.purchases.append(purchase)
             pass
-        return   
+        return  
         
     def make_invoice(self):
         session = bill.Session("example.gnucash")
         session.open()
-        
         print session.vendor_search("E Bay", 100)
         session.close()    
         return
