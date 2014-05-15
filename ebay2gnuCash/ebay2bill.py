@@ -120,6 +120,8 @@ class Purchase:
                 
     def parse_purchase(self, data):
         idxs = []
+        #print '\n\n'
+        #self.vendor.print_vendor()
         for i in range(len(data)-1):
             if data[i].find('Item name ') != -1:
                 idxs.append(i)
@@ -127,9 +129,8 @@ class Purchase:
         for i in range(len(idxs)-1):
             item = Item(data[idxs[i]:idxs[i+1]])
             self.items.append(item)
-            print'\n\n'
-            item.print_items()
-            #self.vendor.add_item(item)            
+            #print'\n'
+            #item.print_items()           
         return
         
         
@@ -140,9 +141,9 @@ class Purchase:
             self.vendor.addr.append(data[i].lstrip(' ').rstrip(' '))
         
     def print_purchase(self):
-        print '\nVendor Data:'
+        print '\nVendor Data:\n'
         self.vendor.print_vendor()
-        print '\nItem data:'
+        print '\nItem data:\n'
         for item in self.items:
             item.print_items()
         return
@@ -156,7 +157,7 @@ class Purchase:
 ###### END CLASS Purchase ########    
     
     
-class EbayBill():
+class EbayMail():
     purchases = [] # List of Purchases in email, usually just the one but mutiples are possible.
      
     def __init__(self,billmail, cashfile, account):
@@ -192,6 +193,9 @@ class EbayBill():
             purchase = Purchase(plist[idxs[i]:idxs[i+1]])
             self.purchases.append(purchase)
             pass
+        for p in self.purchases:
+            print '\n\n'
+            p.print_purchase()
         return  
         
     def make_invoice(self):
@@ -222,8 +226,8 @@ except:	ACCOUNT="Business Expenses" # Default if absent on the command line.  Ed
 try: MAILFILE = sys.argv[3]
 except: MAILFILE = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
     
-ebay_bill = EbayBill(MAILFILE,GNUFILE, ACCOUNT)
-plain = ebay_bill.get_plain_mail(ebay_bill.msg)
+ebay_mail = EbayMail(MAILFILE,GNUFILE, ACCOUNT)
+plain = ebay_mail.get_plain_mail(ebay_mail.msg)
 plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
-ebay_bill.parse_mail(plist)
+ebay_mail.parse_mail(plist)
 
