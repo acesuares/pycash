@@ -22,13 +22,14 @@ logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(
 
 class Vendor:
     guid = None
-    name = ''
-    addr = []
-    email = ''
     items = [] # List of items from this vendor.
 
     def __init__(self):
         self.guid = uuid.uuid4()
+        self.addr = []
+        self.email = ''
+        self.name = ''
+        self.addr_name = ''
         return
 
     def parse_vendor_data(self, data):
@@ -105,9 +106,17 @@ class Purchase:
 
     def parse_vendor(self, data):
         self.vendor.name=data[0].rpartition('Seller:')[2].lstrip(' ') # Always
-        for i in range(4,8):
-            if data[i][0:3] == '---': break ## See mail.txt for why
-            self.vendor.addr.append(data[i].lstrip(' ').rstrip(' '))
+        if data[3] [0:3] != '---':
+            self.vendor.addr_name=data[3].rpartition('Seller:')[2].lstrip(' ') # Always
+            for i in range(4,8):
+                if data[i][0:3] == '---':
+                    self.vendor.addr.append(self.vendor.name) # Need this or we get errors later
+                    break ## See mail.txt for why
+                self.vendor.addr.append(data[i].lstrip(' ').rstrip(' '))
+        else: 
+            self.vendor.addr_name = data[0].rpartition('Seller:')[2].lstrip(' ')
+            #self.vendor.addr.append(data[0].rpartition('Seller:')[2].lstrip(' ') )
+            self.vendor.addr.append("Ebay")
 
     def parse_purchase(self, data):
         idxs = []
@@ -206,12 +215,32 @@ ebay_mail = EbayMail(MAILFILE,GNUFILE, ACCOUNT)
 plain = ebay_mail.get_plain_mail(ebay_mail.msg)
 plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
 ebay_mail.parse_mail(plist)
+
+'''DEBUGGING MALARKY
 for p in ebay_mail.purchases:
     print p.guid
     #print p.purchase_data
-    print "\tVendor -",p.vendor.guid, p.vendor.name
-    for i in p.items:
-        print "\tItem -",i.guid, i.attribs['Item name']
+    #print "\tVendor -",p.vendor.guid, p.vendor.name, 
+    print '\n\n',p.vendor.addr_name
+    print p.vendor.addr
+   
+    #for i in p.items:
+    #    print "\tItem -",i.guid, i.attribs['Item name']
 
     #p.print_purchase()
+
+
+
+quit()'''
+
+import pycash
+pysession = pycash.Session("example.gnucash")
+pysession.open()
+# Do stuff
+for p in ebay_mail.purchases:
+    pysession.make_invoice_from_purchase(p)
+
+pysession.close(save = True)
+
+
 
