@@ -6,6 +6,9 @@ An object to represent averything in a Gnucash Invoice/Bill
 
 import sys
 import csv
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
 
 
 # Add the Gnucash Python stuff
@@ -38,7 +41,7 @@ class Session():
         self.currency = self.comm_table.lookup("CURRENCY", "GBP")
         
     def close(self,save = False):
-        if save: session.save() #
+        if save: self.session.save() #
         self.session.end()
         self.session.destroy()
             
@@ -53,18 +56,61 @@ class Session():
             possible = self.book.VendorLookupByID(search_string)
             if possible: 
                 if possible.GetName() == name_string:
-                    return  name_string, search_string
+                    return  True, name_string, search_string
             search_id += 1
+        return False
         
-        def invoice_search(self,name_string, max_id): # this can also be a bill
-            vendor_search(name_string, max_id)
+    def invoice_search(self,name_string, max_id): # this can also be a bill
+        vendor_search(name_string, max_id)
+        
+    def make_new_vendor(self,vendor_name, address1="The Internet"):
+        new_vendor = gnucash.gnucash_business.Vendor(self.book,self.book.VendorNextID(),self.currency)
+        new_vendor.BeginEdit()
+        new_vendor.SetName(vendor_name)
+        # Has to have at least one address line
+        addr =  new_vendor.GetAddr()
+        addr.BeginEdit()
+        addr.SetName(vendor_name)
+        addr.SetAddr1(address1)
+        addr.CommitEdit()
+        new_vendor.CommitEdit()
+    
+    def new_vendor_from_object(self,vendor):
+        #if type(vendor) != Vendor: return
+        new_vendor = gnucash.gnucash_business.Vendor(self.book,
+            self.book.VendorNextID(),
+            self.currency)
+        new_vendor.BeginEdit()
+        new_vendor.SetName(vendor.name)
+        new_vendor.CommitEdit()
+        addr = new_vendor.GetAddr()
+        addr.BeginEdit()
+        addr.SetName(vendor.addr_name)
+        try:addr.SetAddr1(vendor.addr[0])
+        except:pass
+        try:addr.SetAddr2(vendor.addr[1])
+        except:pass
+        try:addr.SetAddr3(vendor.addr[2])
+        except:pass
+        try:addr.SetAddr4(vendor.addr[3])
+        except:pass
+        addr.CommitEdit()
+        return new_vendor.GetID()
+
+    def make_invoice_from_purchase(self,purchase_object):
+        ''' Create an invoice from a Purchase Object
+        '''
+        po = purchase_object
+        print str(po.vendor.addr[0])
+        #return
+        v_name = po.vendor.name
+        logging.info(self.vendor_search(v_name, 100))
+        if not self.vendor_search(v_name, 100):
+            #self.make_new_vendor(po.vendor.name)
+            self.new_vendor_from_object(po.vendor)
             
-        def make_new_vendor(vendor_name, address1="The Internet"):
-            new_vendor = gnucash.gnucash_business.Vendor(self.book,self.book.VendorNextID(),self.gbp)
-            new_vendor.SetName(vendor_name)
-            # Has to have at least one address line
-            addr =  new_cust.GetAddr()
-            addr.SetAddr1(address1)
+        #invoice = Invoice(self.book, inv_num, self.currency, self.customer)
+        
 
 class Invoice():
     ID=None
@@ -84,7 +130,7 @@ class Invoice():
         self.currency = currency
         
         
-    def add_entry(self):
+    def add_entry(self, item):
         ''' An entry has the following data.
         '''
         entry = gnucash.gnucash_business.Entry(self.book, self)
@@ -158,4 +204,5 @@ if __name__ == "__main__":
     session = Session("example.gnucash")
     session.open()
     print session.vendor_search("E Bay", 100)
+    print session.vendor_search("quasarcomponents",100)
     session.close()
