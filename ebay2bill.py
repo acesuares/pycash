@@ -59,7 +59,8 @@ class Item:
                         "P&amp;P price:", #
                         "Quantity:", #
                         "Item total:",  #
-                        "Paid on")  #
+                        "Paid on ",
+                        "transaction::")  #
 
     def __init__(self, item_data):
         # Object attributes
@@ -72,7 +73,7 @@ class Item:
         for line in data:
             for needle in self.item_search_terms:
                 if line.find(needle) != -1:
-                    self.attribs[needle.strip(':')] = line.rpartition(needle)[2].lstrip(' ')
+                    self.attribs[needle.strip(':').rstrip(' ')] = line.rpartition(needle)[2].lstrip(' ').strip('£')
 
     def print_items(self):
         #print self.attribs.items()
@@ -148,7 +149,7 @@ class Purchase:
 
 class EbayMail():
     purchases = [] # List of Purchases in email, usually just the one but mutiples are possible.
-
+    mail_date = ''
     def __init__(self,billmail, cashfile, account):
         self.INFILE = billmail
         self.account = account
@@ -171,6 +172,8 @@ class EbayMail():
         '''
         idxs = [] # list of occurrences.
         for line in plist:
+            if line.find("Date: ") != -1:
+                self.mail_date = line.rpartition("Date: ")[2].lstrip(' ')
             if line.find("Seller:") != -1:
                 #print line
                 idxs.append(plist.index(line))
@@ -182,13 +185,6 @@ class EbayMail():
         for i in range(len(idxs)-1):
             purchase = Purchase(plist[idxs[i]:idxs[i+1]])
             self.purchases.append(purchase)
-
-    def make_invoice(self):
-        session = bill.Session("example.gnucash")
-        session.open()
-        print session.vendor_search("E Bay", 100)
-        session.close()
-        return
 
     def parse_totals(self,plain):
 
