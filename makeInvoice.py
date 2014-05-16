@@ -27,9 +27,10 @@ sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
 import backend_errors
 import gnucash
 import gnucash.gnucash_business
-
-
-from datetime import date
+from gnucash import Session, GUID, GncNumeric
+from gnucash.gnucash_business import Customer, Invoice, Entry
+import datetime
+#from datetime import date, datetime
 from decimal import Decimal
 for arg in sys.argv:
     print arg # Or, more realistically assign them to our constants
@@ -42,7 +43,7 @@ SALE_AMOUNT = 0
 SALE_COMMENT = ''
 CURRENCY = {'GBP':'gbp'}
 URI = ''
-FILE = "/path/to/account.gnucash"
+FILE = "/home/mikee/Projects/pycash/example.gnucash"
 
 '''
 @param
@@ -70,8 +71,8 @@ def gnc_numeric_from_decimal(decimal_value):
 #NB:  DO NOT USE YOUR REAL DATA FILE!  This script will write the new invoice
 # into the named file, you probably do not want this to happen to your real data!!
 try:
-  session = Session("xml://%s" % FILE, False, False, False)
-except GnuCashBackendException, backend_exception:
+  session =  gnucash.Session("xml://%s" % FILE, False, False, False)
+except gnucash.GnuCashBackendException, backend_exception:
   errno =  backend_exception.errors[0] ## get first error number
   print backend_exception
   # Do something with it
