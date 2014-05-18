@@ -125,16 +125,16 @@ class Session():
             
         vendor =  self.book.VendorLookupByID(vid)
         bill_num = po.items[0].attribs['transaction']
-        bill = gnucash.gnucash_business.Invoice(self.book, bill_num, self.currency, vendor ) 
+        bill = gnucash.gnucash_business.Bill(self.book, bill_num, self.currency, vendor ) 
         bill.SetNotes("Transaction ID: " + po.items[0].attribs['transaction'])
         assert(isinstance(bill, gnucash.gnucash_business.Invoice))
         bill.SetDateOpened(datetime.date.today())
         # Add each line item entry
         for i in po.items: 
             entry = gnucash.gnucash_business.Entry(self.book, bill)
+            entry.SetDateEntered(datetime.date.today())
             entry.SetDate(datetime.date.today()) # FIXME get from mail.
             entry.SetDate(datetime.datetime.strptime(i.attribs['Paid on'], "%d-%b-%y"))
-            entry.SetDateEntered(datetime.date.today())
             entry.SetDescription (i.attribs['Item name'])
             logging.info(entry.GetDate())
             entry.SetAction("EA")
@@ -146,16 +146,10 @@ class Session():
             entry.SetBillTaxTable(self.book.TaxTableLookupByName("VAT"))
             entry.SetBillTaxable(False)
             entry.SetBillTaxIncluded(False)
-            #bill.AddEntry(entry)
             
-    
+            
 ################################################################################        
 
+ 
     
-# Test code goes here.
-if __name__ == "__main__":
-    session = Session("example.gnucash")
-    session.open()
-    print session.vendor_search("E Bay", 100)
-    print session.vendor_search("quasarcomponents",100)
-    session.close()
+   
