@@ -10,15 +10,26 @@ import logging
 import datetime
 from decimal import Decimal
 
-logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
 
+logging.basicConfig(level=logging.CRITICAL, 
+        format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
+root_logger = logging.getLogger()
+root_logger.disabled = False # Set to True do disable logging.
 
 # Add the Gnucash Python stuff
-sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
+sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-packages')
 import gnucash
 import gnucash.gnucash_business
-#import gnucash.gnucash_core.GnuCashBackendException
-#from gnucash.gnucash_business import Vendor, Invoice, Entry
+
+# Change the next set of values to match your actual CnuCash account setup.
+# The inflexability of accounts here may not suit everybodys taste but bills can always
+# be altered later.
+EXPENSE_ACCOUNT = "Business Expenses.Miscellaneous"
+PAYABLE_ACCOUNT = "Liabilities.PayPal"
+XFER_ACCOUNT = "Assets.Current Assets.Petty Cash"
+CURRENCY = "GBP" # Probably should get the account default currency.  TODO
+     
+
 
 class Session():
     def __init__(self, gnufile):
@@ -30,19 +41,21 @@ class Session():
           self.session = gnucash.Session("xml://%s" % self.gnufile, False, True)
         except gnucash.GnuCashBackendException as (errno):
           print "{0}".format(errno)
-          print "Unknown error occurred. Stopping"
+          print "An error occurred. Stopping"
           quit(1)
 
 
         self.root = self.session.book.get_root_account()
         self.book = self.session.book
-        #self.sales = self.root.lookup_by_name('Sales')
-        #self.bank  = self.root.lookup_by_name('Business Account')
-        #self.assets = self.root.lookup_by_name("Assets")
-        #self.recievables = self.assets.lookup_by_name("Accounts Recievable")
-        #self.income = self.root.lookup_by_name("Sales")
         self.comm_table = self.book.get_table()
-        self.currency = self.comm_table.lookup("CURRENCY", "GBP")
+        self.currency = self.comm_table.lookup("CURRENCY", CURRENCY)
+        self.exp_account = self.root.lookup_by_full_name(EXPENSE_ACCOUNT)
+        self.payable = self.root.lookup_by_full_name(PAYABLE_ACCOUNT)
+        self.xfer_account = self.root.lookup_by_full_name(XFER_ACCOUNT)
+        assert(self.xfer_account != None)
+        assert(self.exp_account != None)
+        assert(self.payable != None)
+        
         
     def close(self,save = False):
         if save: self.session.save() #
@@ -111,10 +124,8 @@ class Session():
         ''' Create an invoice from a Purchase Object
         '''
         po = purchase_object
-        #print str(po.vendor.addr[0])
-        account = self.root.lookup_by_full_name("Business Expenses.Miscellaneous")
-        assert(account != None)
-        print account
+        self.today = datetime.date.today()
+        self.bill_date = datetime.datetime.strptime(po.items[0].attribs['Paid on'], "%d-%b-%y")
         v_name = po.vendor.name
         vid = ''
         #logging.info(self.vendor_search(v_name, 100))
@@ -124,29 +135,48 @@ class Session():
         vid = self.vendor_search(v_name, 100)[0]
             
         vendor =  self.book.VendorLookupByID(vid)
+        logging.info(vendor.GetName())
         bill_num = po.items[0].attribs['transaction']
+        # Check for duplicate invoice IDs
+        test = self.book.BillLoookupByID(bill_num)
+        logging.info(bill_num)
+        if test:
+            if test.GetID() == bill_num:
+                print "We have a duplicate Bill ID.  Do a manual insert if required"
+                return
         bill = gnucash.gnucash_business.Bill(self.book, bill_num, self.currency, vendor ) 
         bill.SetNotes("Transaction ID: " + po.items[0].attribs['transaction'])
         assert(isinstance(bill, gnucash.gnucash_business.Invoice))
-        bill.SetDateOpened(datetime.date.today())
+        bill.SetDateOpened(self.bill_date)
         # Add each line item entry
         for i in po.items: 
             entry = gnucash.gnucash_business.Entry(self.book, bill)
-            entry.SetDateEntered(datetime.date.today())
-            entry.SetDate(datetime.date.today()) # FIXME get from mail.
-            entry.SetDate(datetime.datetime.strptime(i.attribs['Paid on'], "%d-%b-%y"))
+            entry.SetDateEntered(self.bill_date)
+            entry.SetDate(self.bill_date)
             entry.SetDescription (i.attribs['Item name'])
-            logging.info(entry.GetDate())
+            logging.info(entry.GetDescription())
             entry.SetAction("EA")
-            entry.SetBillAccount(account)
+            entry.SetBillAccount(self.exp_account)
             entry.SetQuantity(gnucash.GncNumeric(int(i.attribs['Quantity']) ))
             gnc_price = gnucash.GncNumeric(int(Decimal(i.attribs['Price'])*100), 100) ## = pricex100 then set denom to 100!
             entry.SetBillPrice(gnc_price)
-            logging.info(entry.GetBillPrice().num())
+            #logging.info(entry.GetBillPrice().num())
             entry.SetBillTaxTable(self.book.TaxTableLookupByName("VAT"))
             entry.SetBillTaxable(False)
             entry.SetBillTaxIncluded(False)
             
+        #TODO Postgage, discounts, 
+        txn = bill.PostToAccount(self.payable,
+                        self.bill_date, self.bill_date, "Yay!", True, False)
+        #Pay FIXME ? Or don't.
+        '''vendor.ApplyPayment(bill,
+                            self.payable,
+                            self.xfer_account,
+                            gnc_price,
+                            gnucash.GncNumeric(1,1),
+                            self.bill_date,
+                            "memo","num")'''
+
             
 ################################################################################        
 

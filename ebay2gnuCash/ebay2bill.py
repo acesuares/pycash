@@ -9,14 +9,16 @@
 # See mail.txt for a complicated example.
 # Use transaction as the bill ID as then we can trace these back, perhaps prepend ebay-
 
-import sys
+import sys, os
 import csv
 import email
-#import pycash
+import pycash
 import json
 import copy
 import logging
 import uuid
+import fcntl
+import time
 
 logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
 
@@ -195,48 +197,63 @@ class EbayMail():
 
 
 # START HERE
+# Default values are convenience for my test runs.  Not at all useful to anyone else
+# without editing.  Arguably I should be calling this from a test Bash script.
+# Make this accept multiple files alse we get BACKEnD_LOCKED errors when mutiple files
+# are selected in Claws-Mail.
 if __name__ == "__main__":
-    VENDOR_ID="000019" # All ebay stuff in here.
+    '''pid_file = 'program.pid'
+    fp = open(pid_file, 'w')
+    #while 1:
+    try:
+        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)        
+    except IOError:
+        print "another instance is running"
+        sys.exit(1)
+        #print "waiting"
+        #time.sleep(5)
+    #main()
+    '''
+    '''
+    We can recieve input that looks like:
+    "/home/mikee/claws_mail/E Bay/269" "/home/mikee/claws_mail/E Bay/327" "/home/mikee/claws_mail/E Bay/326" "/home/mikee/claws_mail/E Bay/265" "/home/mikee/claws_mail/E Bay/335" "/home/mikee/claws_mail/E Bay/285" "/home/mikee/claws_mail/E Bay/303" "/home/mikee/claws_mail/E Bay/307"
+    /home/mikee/claws_mail/E Bay/269
+    Note the last one isn't quoted and is a copy of the first one. :(
+    So we either parse this input or we gat called mutipl times and use locking. :(
+    '''
+    HERE = os.path.dirname(os.path.realpath(__file__))
+    
+    # Test for insufficient args
+    if len(sys.argv) < 2:
+        print "No arge supplied"
+        sys.exit(1)
+        
+    if sys.argv[1] != None:
+        GNUFILE = sys.argv[1]
+    else:
+        GNUFILE = HERE+"/example.gnucash"
+    GNUFILE = HERE+"/example.gnucash"
+    print "GNUFILE",GNUFILE
 
-try: GNUFILE=sys.argv[1]
-except: GNUFILE="example.gnucash"
-
-try: ACCOUNT=sys.argv[2]
-except:	ACCOUNT="Business Expenses" # Default if absent on the command line.  Edit to suit your account tree
-
-try: MAILFILE = sys.argv[3]
-except: MAILFILE = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
-
-ebay_mail = EbayMail(MAILFILE,GNUFILE, ACCOUNT)
-plain = ebay_mail.get_plain_mail(ebay_mail.msg)
-plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
-ebay_mail.parse_mail(plist)
-
-'''DEBUGGING MALARKY
-for p in ebay_mail.purchases:
-    print p.guid
-    #print p.purchase_data
-    #print "\tVendor -",p.vendor.guid, p.vendor.name, 
-    print '\n\n',p.vendor.addr_name
-    print p.vendor.addr
-   
-    #for i in p.items:
-    #    print "\tItem -",i.guid, i.attribs['Item name']
-
-    #p.print_purchase()
-
-
-
-quit()'''
-
-import pycash
-pysession = pycash.Session("example.gnucash")
-pysession.open()
-# Do stuff
-for p in ebay_mail.purchases:
-    pysession.make_invoice_from_purchase(p)
-
-pysession.close(save = True)
+    try: MAILFILES = sys.argv[2:]# May be more than one
+    except: MAILFILES = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
+    #sys.exit(1)
+    for MAILFILE in MAILFILES:
+        print "foo",MAILFILE,"bar"
+        #continue
+        ebay_mail = EbayMail(MAILFILE,GNUFILE, ACCOUNT)
+        plain = ebay_mail.get_plain_mail(ebay_mail.msg)
+        plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
+        ebay_mail.parse_mail(plist)
+        
+        #quit()
+        # Parsing done, now insert the data into GnuCash
+        # ooh jthis innefficient FIXME
+        pysession = pycash.Session(GNUFILE)
+        pysession.open()
+        for p in ebay_mail.purchases:
+            pysession.make_invoice_from_purchase(p)
+        pysession.close(save = True)
 
 
 
