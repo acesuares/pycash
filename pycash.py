@@ -10,11 +10,10 @@ import logging
 import datetime
 from decimal import Decimal
 
-
-logging.basicConfig(level=logging.CRITICAL, 
+logging.basicConfig(level=logging.DEBUG, 
         format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
-root_logger = logging.getLogger()
-root_logger.disabled = False # Set to True do disable logging.
+#root_logger = logging.getLogger()
+#root_logger.disabled = False # Set to True do disable logging.
 
 # Add the Gnucash Python stuff
 sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-packages')
@@ -153,13 +152,19 @@ class Session():
             entry = gnucash.gnucash_business.Entry(self.book, bill)
             entry.SetDateEntered(self.bill_date)
             entry.SetDate(self.bill_date)
+            #try: # If it's a P&P item this block will fail
             entry.SetDescription (i.attribs['Item name'])
-            logging.info(entry.GetDescription())
-            entry.SetAction("EA")
-            entry.SetBillAccount(self.exp_account)
             entry.SetQuantity(gnucash.GncNumeric(int(i.attribs['Quantity']) ))
             gnc_price = gnucash.GncNumeric(int(Decimal(i.attribs['Price'])*100), 100) ## = pricex100 then set denom to 100!
             entry.SetBillPrice(gnc_price)
+            #except: # P&P
+            #    entry.SetDescription ('Postage and packing')
+            #    entry.SetQuantity(gnucash.GncNumeric(1/1))
+            #    gnc_price = gnucash.GncNumeric(i.attribs['Postage and packing']*100, 100) ## = pricex100 then set denom to 100!
+            #    entry.SetBillPrice(gnc_price)
+            entry.SetAction("EA")
+            entry.SetBillAccount(self.exp_account)
+            entry.SetBillAccount(self.exp_account)
             #logging.info(entry.GetBillPrice().num())
             entry.SetBillTaxTable(self.book.TaxTableLookupByName("VAT"))
             entry.SetBillTaxable(False)
