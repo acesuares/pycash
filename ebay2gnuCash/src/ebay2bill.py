@@ -111,7 +111,6 @@ class Postage():
                 except: pass
             if line.find("Postage discount from seller") != -1: # Discount line
                 #logging.info("Found discount for this seller.")
-                #logging.info(line)
                 self.discount = float(line.rpartition(("Postage discount from seller").lstrip().strip('£'))[2].rpartition(":")[2].lstrip())
                 self.seller = line.rpartition("Postage discount from seller")[2].rpartition(":")[0].strip()
     
@@ -202,6 +201,7 @@ class EbayMail():
         
     def test_subject(self, msg):
         '''Check that the subject line is what we expect.'''
+        logging.debug(msg['Subject'])
         if msg['Subject'][:29] != "Confirmation of your order of":return
         
 
@@ -229,9 +229,7 @@ class EbayMail():
                 idxs.append(plist.index(line))
             if line.find("Postage discount from seller ") != -1:
                 pdidx = plist.index(line)
-                #logging.info(plist[pdidx])
             idxs.sort()
-            #logging.info(idxs)
         for i in range(len(idxs)-1):
             pl = plist[idxs[i]:idxs[i+1]]
             if pdidx: pl.append(plist[pdidx])
@@ -245,23 +243,7 @@ class EbayMail():
 
 
 # START HERE
-# Default values are convenience for my test runs.  Not at all useful to anyone else
-# without editing.  Arguably I should be calling this from a test Bash script.
-# Make this accept multiple files alse we get BACKEnD_LOCKED errors when mutiple files
-# are selected in Claws-Mail.
 if __name__ == "__main__":
-    '''pid_file = 'program.pid'
-    fp = open(pid_file, 'w')
-    #while 1:
-    try:
-        fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)        
-    except IOError:
-        print "another instance is running"
-        sys.exit(1)
-        #print "waiting"
-        #time.sleep(5)
-    #main()
-    '''
     '''
     We can recieve input that looks like:
     "/home/mikee/claws_mail/E Bay/269" "/home/mikee/claws_mail/E Bay/327" "/home/mikee/claws_mail/E Bay/326" "/home/mikee/claws_mail/E Bay/265" "/home/mikee/claws_mail/E Bay/335" "/home/mikee/claws_mail/E Bay/285" "/home/mikee/claws_mail/E Bay/303" "/home/mikee/claws_mail/E Bay/307"
