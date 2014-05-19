@@ -2,4 +2,8 @@
 
 GnuCash users, do you ever shop on EBay?  Of course you do.  Is it a real pain to record those purchases in GnuCash?  Hell yes.  This is the functionalty for you especially if you are a claws-mail user too.
 
-Parses the email and creates a bill.  Any changes in the EBay mail will require changes to the scripts.
+Parses the email and creates a bill or bills.  Any changes in the EBay mail format will require changes to the scripts and currently this has only been tested on new mails from ebay.co.uk.  The bill number will assigned from the "transaction" number in the email and if a bill with ID already exists it will refuse to create a new one.  New Vendors will be created as required.
+
+== Integration with Claws-Mail
+
+Claws-Mail (and probably others too) can execute an external command and pass some paramters to the command.  The parameter we need is the filename of the email, %F.  So in Claws-Mail go to Configuration->Actions... to open up a dialog box.  Give the action a name and in the Command box fill in the full path to ebay2bill.py with a space and %F following it.  Click Add.  Now in the Tools->Actions menu you will see this item displayed.  Click on this with emails entitiled "Confirmation of your order of..." highlighted in the mail list and these mails will be read and used to create a new bill in GnuCash.

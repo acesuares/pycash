@@ -17,7 +17,6 @@ import json
 import copy
 import logging
 import uuid
-import fcntl
 import time
 from decimal import Decimal
 
@@ -194,11 +193,17 @@ class Purchase:
 class EbayMail():
     purchases = [] # List of Purchases in email, usually just the one but mutiples are possible.
     mail_date = ''
-    def __init__(self,billmail, cashfile):
+    def __init__(self,billmail):
         self.INFILE = billmail
         f = open(self.INFILE)
         self.msg = email.message_from_file(f)
         f.close()
+        self.test_subject(self.msg)
+        
+    def test_subject(self, msg):
+        '''Check that the subject line is what we expect.'''
+        if msg['Subject'][:29] != "Confirmation of your order of":return
+        
 
     def get_plain_mail(self,mail):
         ''' Get the plain text part of the mail.'''
@@ -267,23 +272,16 @@ if __name__ == "__main__":
     HERE = os.path.dirname(os.path.realpath(__file__))
     
     # Test for insufficient args
-    if len(sys.argv) < 2:
-        print "No arge supplied"
+    if len(sys.argv) < 1:
+        print "No arguments supplied"
         sys.exit(1)
-        
-    if sys.argv[1] != None:
-        GNUFILE = sys.argv[1]
-    else:
-        GNUFILE = HERE+"/example.gnucash"
-    GNUFILE = HERE+"/example.gnucash"
-    print "GNUFILE",GNUFILE
 
-    try: MAILFILES = sys.argv[2:]# May be more than one
+    try: MAILFILES = sys.argv[1:]# May be more than one
     except: MAILFILES = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
     for MAILFILE in MAILFILES:
         print "foo",MAILFILE,"bar"
         #continue
-        ebay_mail = EbayMail(MAILFILE,GNUFILE)
+        ebay_mail = EbayMail(MAILFILE)
         plain = ebay_mail.get_plain_mail(ebay_mail.msg)
         plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
         ebay_mail.parse_mail(plist)

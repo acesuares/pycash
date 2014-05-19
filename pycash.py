@@ -193,6 +193,7 @@ class Session():
 
 if __name__ == "__main__":
     #print Config.items("CONFIG")
+    pass
     
     
    
