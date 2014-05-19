@@ -9,6 +9,11 @@ import csv
 import logging
 import datetime
 from decimal import Decimal
+import ConfigParser
+
+
+Config = ConfigParser.ConfigParser()
+Config.read("pybay.conf")
 
 logging.basicConfig(level=logging.DEBUG, 
         format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
@@ -23,11 +28,12 @@ import gnucash.gnucash_business
 # Change the next set of values to match your actual CnuCash account setup.
 # The inflexability of accounts here may not suit everybodys taste but bills can always
 # be altered later.
-EXPENSE_ACCOUNT = "Business Expenses.Miscellaneous"
-PAYABLE_ACCOUNT = "Liabilities.PayPal"
-XFER_ACCOUNT = "Assets.Current Assets.Petty Cash"
-CURRENCY = "GBP" # Probably should get the account default currency.  TODO
-     
+EXPENSE_ACCOUNT = Config.get("CONFIG","EXPENSE_ACCOUNT")
+PAYABLE_ACCOUNT = Config.get("CONFIG","PAYABLE_ACCOUNT")
+XFER_ACCOUNT = Config.get("CONFIG","XFER_ACCOUNT")
+CURRENCY = Config.get("CONFIG","CURRENCY") # Probably should get the account default currency.  TODO
+PAY_BILL = Config.getboolean("CONFIG","PAY_BILL") # Boolean
+POST_BILL = Config.getboolean("CONFIG","POST_BILL") # Boolean
 
 
 class Session():
@@ -164,20 +170,25 @@ class Session():
             entry.SetBillTaxable(False)
             entry.SetBillTaxIncluded(False)
             
-        txn = bill.PostToAccount(self.payable,
+        if POST_BILL: txn = bill.PostToAccount(self.payable,
                         self.bill_date, self.bill_date, "Yay!", True, False)
-        #Pay FIXME ? Or don't.
-        '''vendor.ApplyPayment(bill,
+        
+        if POST_BILL:#Pay FIXME ? Or don't.
+            '''vendor.ApplyPayment(bill,
                             self.payable,
                             self.xfer_account,
                             gnc_price,
                             gnucash.GncNumeric(1,1),
                             self.bill_date,
-                            "memo","num")'''
+                            "memo","num")
+            '''
+            pass
 
             
 ################################################################################        
 
- 
+if __name__ == "__main__":
+    print Config.items("CONFIG")
+    
     
    

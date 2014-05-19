@@ -1,3 +1,5 @@
 = Take an e-bay confirmation email and create a bill in GnuCash
 
+GnuCash users, do you ever shop on EBay?  Of course you do.  Is it a real pain to record those purchases in GnuCash?  Hell yes.  This is the functionalty for you especially if you are a claws-mail user too.
+
 Parses the email and creates a bill.  Any changes in the EBay mail will require changes to the scripts.
