@@ -269,7 +269,6 @@ if __name__ == "__main__":
     Note the last one isn't quoted and is a copy of the first one. :(
     So we either parse this input or we gat called mutipl times and use locking. :(
     '''
-    HERE = os.path.dirname(os.path.realpath(__file__))
     
     # Test for insufficient args
     if len(sys.argv) < 1:
@@ -288,7 +287,7 @@ if __name__ == "__main__":
         
         #sys.exit(1)
         print "\nParsing done, now inserting the data into GnuCash\n"
-        pysession = pycash.Session(GNUFILE)
+        pysession = pycash.Session()
         pysession.open()
         for p in ebay_mail.purchases:
             pysession.make_invoice_from_purchase(p)

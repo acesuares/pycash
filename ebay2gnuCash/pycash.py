@@ -4,7 +4,7 @@
 An object to represent averything in a Gnucash Invoice/Bill
 '''
 
-import sys
+import sys,os
 import csv
 import logging
 import datetime
@@ -25,6 +25,7 @@ sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-package
 import gnucash
 import gnucash.gnucash_business
 
+HERE = os.path.dirname(os.path.realpath(__file__)) 
 # Change the next set of values to match your actual CnuCash account setup.
 # The inflexability of accounts here may not suit everybodys taste but bills can always
 # be altered later.
@@ -39,10 +40,12 @@ except ConfigParser.Error as e:
     print "\n\nProblems reading config file.  Check values.\n"
     print e
     sys.exit(1)
+logging.debug(type(XFER_ACCOUNT))
 
 class Session():
-    def __init__(self, gnufile):
-        self.gnufile = gnufile;
+    def __init__(self, ):
+        self.gnufile = HERE + "/" + Config.get("CONFIG","GNUFILE");
+        #logging.debug(self.gnufile)
         return
         
     def open(self):
