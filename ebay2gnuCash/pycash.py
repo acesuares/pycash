@@ -28,13 +28,17 @@ import gnucash.gnucash_business
 # Change the next set of values to match your actual CnuCash account setup.
 # The inflexability of accounts here may not suit everybodys taste but bills can always
 # be altered later.
-EXPENSE_ACCOUNT = Config.get("CONFIG","EXPENSE_ACCOUNT")
-PAYABLE_ACCOUNT = Config.get("CONFIG","PAYABLE_ACCOUNT")
-XFER_ACCOUNT = Config.get("CONFIG","XFER_ACCOUNT")
-CURRENCY = Config.get("CONFIG","CURRENCY") # Probably should get the account default currency.  TODO
-PAY_BILL = Config.getboolean("CONFIG","PAY_BILL") # Boolean
-POST_BILL = Config.getboolean("CONFIG","POST_BILL") # Boolean
-
+try:
+    EXPENSE_ACCOUNT = Config.get("CONFIG","EXPENSE_ACCOUNT")
+    PAYABLE_ACCOUNT = Config.get("CONFIG","PAYABLE_ACCOUNT")
+    XFER_ACCOUNT = Config.get("CONFIG","XFER_ACCOUNT")
+    CURRENCY = Config.get("CONFIG","CURRENCY") # Probably should get the account default currency.  TODO
+    PAY_BILL = Config.getboolean("CONFIG","PAY_BILL") # Boolean
+    POST_BILL = Config.getboolean("CONFIG","POST_BILL") # Boolean
+except ConfigParser.Error as e:
+    print "\n\nProblems reading config file.  Check values.\n"
+    print e
+    sys.exit(1)
 
 class Session():
     def __init__(self, gnufile):
@@ -188,7 +192,7 @@ class Session():
 ################################################################################        
 
 if __name__ == "__main__":
-    print Config.items("CONFIG")
+    #print Config.items("CONFIG")
     
     
    
