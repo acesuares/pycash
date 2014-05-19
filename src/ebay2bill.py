@@ -275,8 +275,7 @@ if __name__ == "__main__":
         print "No arguments supplied"
         sys.exit(1)
 
-    try: MAILFILES = sys.argv[1:]# May be more than one
-    except: MAILFILES = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
+    MAILFILES = sys.argv[1:]# May be more than one
     for MAILFILE in MAILFILES:
         print "foo",MAILFILE,"bar"
         #continue
