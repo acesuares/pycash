@@ -7,3 +7,11 @@ Parses the email and creates a bill or bills.  Any changes in the EBay mail form
 == Integration with Claws-Mail
 
 Claws-Mail (and probably others too) can execute an external command and pass some paramters to the command.  The parameter we need is the filename of the email, %F.  So in Claws-Mail go to Configuration->Actions... to open up a dialog box.  Give the action a name and in the Command box fill in the full path to ebay2bill.py with a space and %F following it.  Click Add.  Now in the Tools->Actions menu you will see this item displayed.  Click on this with emails entitiled "Confirmation of your order of..." highlighted in the mail list and these mails will be read and used to create a new bill in GnuCash.
+
+== Beerware
+
+This software is beerware, if you use it an like it send me some money for a beer by PayPal at:
+
+https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3SQCKHY7AU3JU
+
+
