@@ -152,16 +152,10 @@ class Session():
             entry = gnucash.gnucash_business.Entry(self.book, bill)
             entry.SetDateEntered(self.bill_date)
             entry.SetDate(self.bill_date)
-            #try: # If it's a P&P item this block will fail
             entry.SetDescription (i.attribs['Item name'])
             entry.SetQuantity(gnucash.GncNumeric(int(i.attribs['Quantity']) ))
             gnc_price = gnucash.GncNumeric(int(Decimal(i.attribs['Price'])*100), 100) ## = pricex100 then set denom to 100!
             entry.SetBillPrice(gnc_price)
-            #except: # P&P
-            #    entry.SetDescription ('Postage and packing')
-            #    entry.SetQuantity(gnucash.GncNumeric(1/1))
-            #    gnc_price = gnucash.GncNumeric(i.attribs['Postage and packing']*100, 100) ## = pricex100 then set denom to 100!
-            #    entry.SetBillPrice(gnc_price)
             entry.SetAction("EA")
             entry.SetBillAccount(self.exp_account)
             entry.SetBillAccount(self.exp_account)
@@ -170,7 +164,6 @@ class Session():
             entry.SetBillTaxable(False)
             entry.SetBillTaxIncluded(False)
             
-        #TODO Postgage, discounts, 
         txn = bill.PostToAccount(self.payable,
                         self.bill_date, self.bill_date, "Yay!", True, False)
         #Pay FIXME ? Or don't.

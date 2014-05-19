@@ -94,10 +94,8 @@ class Item:
 class Postage():
     ''' Just the postage
     '''
-    #attribs = {}
     def __init__(self, data):
         # Define stuff
-        #self.attribs = {}
         self.search_term="P&amp;P price:"
         self.postage = 0.0
         self.seller = ''
@@ -108,26 +106,15 @@ class Postage():
         
     def parse_item_information(self,data):
         for line in data:
-            #print '-------\n',line
             if line.find(self.search_term) != -1:
                 try:
                     self.postage += float(line.rpartition(self.search_term)[2].lstrip(' ').strip('£'))
-                    #self.attribs['Postage and packing'] = self.postage
                 except: pass
-                    #self.attribs['Postage and packing'] = self.postage
-                #logging.info(self.postage)
             if line.find("Postage discount from seller") != -1: # Discount line
                 #logging.info("Found discount for this seller.")
                 #logging.info(line)
                 self.discount = float(line.rpartition(("Postage discount from seller").lstrip().strip('£'))[2].rpartition(":")[2].lstrip())
                 self.seller = line.rpartition("Postage discount from seller")[2].rpartition(":")[0].strip()
-        #logging.info("Discount = %f",self.discount)
-        #if self.postage > 0:
-        #    self.postage -= self.discount
-        #    logging.info("%s postage = %f",self.seller, self.postage)
-        
-    # TODO Deal with postage discounts for multiples like:
-    # Postage discount from seller  bright_components : £1.98 
     
     
 #### END CLASS POSTAGE ########
@@ -139,7 +126,6 @@ class Purchase:
     vendor = None # from a single vendor
     purchase_data = None
     guid = None
-    #postage = Postage(None)
 
     def __init__(self, purchase_data):
         self.guid = uuid.uuid4()
@@ -147,10 +133,8 @@ class Purchase:
         self.items = []
         self.purchase_data =  purchase_data
         if not type(purchase_data) == list: return
-        #logging.info("\n\n"+str(self.guid)+"\n"+str(self.purchase_data)) ## DEBUG
         self.parse_vendor(self.purchase_data)
         self.parse_purchase(self.purchase_data)
-        #self.postage_item = self.parse_postage(self.purchase_data)
         self.do_postage(self.purchase_data)
         
     def parse_vendor(self, data):
@@ -229,18 +213,14 @@ class EbayMail():
         Collect the indices of where the serch terms occur, then split the file
         using the indices and send these chunks for further parsing.
         '''
-        #logging.info(type(plist))
-        #print plist
         idxs = [] # list of occurrences.
         pdidx = None
         for line in plist:
             if line.find("Date: ") != -1:
                 self.mail_date = line.rpartition("Date: ")[2].lstrip(' ')
             if line.find("Seller:") != -1:
-                #print line
                 idxs.append(plist.index(line))
             if line.find("Subtotal:") != -1:
-                #print line
                 idxs.append(plist.index(line))
             if line.find("Postage discount from seller ") != -1:
                 pdidx = plist.index(line)
@@ -310,7 +290,6 @@ if __name__ == "__main__":
         
         #sys.exit(1)
         print "\nParsing done, now inserting the data into GnuCash\n"
-        # ooh jthis innefficient FIXME
         pysession = pycash.Session(GNUFILE)
         pysession.open()
         for p in ebay_mail.purchases:
