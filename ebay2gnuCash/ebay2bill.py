@@ -19,6 +19,7 @@ import logging
 import uuid
 import fcntl
 import time
+from decimal import Decimal
 
 logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
 
@@ -58,17 +59,20 @@ class Item:
                         "Item number:", #
                         "transaction::",  #
                         "Price:", #
-                        "P&amp;P price:", #
+                        #"P&amp;P price:", # This is a special case and needs to be handled.  FIXME
                         "Quantity:", #
                         "Item total:",  #
                         "Paid on ",
                         "transaction::")  #
 
     def __init__(self, item_data):
+        
         # Object attributes
+        self.postage = 0.0
         self.attribs = {}
         self.guid = uuid.uuid4()
         # Do stuff
+        if item_data == None: return
         self.parse_item_information(item_data)
 
     def parse_item_information(self,data):
@@ -76,7 +80,8 @@ class Item:
             for needle in self.item_search_terms:
                 if line.find(needle) != -1:
                     self.attribs[needle.strip(':').rstrip(' ')] = line.rpartition(needle)[2].lstrip(' ').strip('£')
-
+    
+        
     def print_items(self):
         #print self.attribs.items()
         for key, value in self.attribs.items():
@@ -86,8 +91,46 @@ class Item:
         return attribs
 
 #### END CLASS ITEM #######
-
-
+class Postage():
+    ''' Just the postage
+    '''
+    #attribs = {}
+    def __init__(self, data):
+        # Define stuff
+        #self.attribs = {}
+        self.search_term="P&amp;P price:"
+        self.postage = 0.0
+        self.seller = ''
+        self.discount = 0.0
+        # Do stuff
+        self.parse_item_information(data)
+        #logging.info(data)
+        
+    def parse_item_information(self,data):
+        for line in data:
+            #print '-------\n',line
+            if line.find(self.search_term) != -1:
+                try:
+                    self.postage += float(line.rpartition(self.search_term)[2].lstrip(' ').strip('£'))
+                    #self.attribs['Postage and packing'] = self.postage
+                except: pass
+                    #self.attribs['Postage and packing'] = self.postage
+                #logging.info(self.postage)
+            if line.find("Postage discount from seller") != -1: # Discount line
+                #logging.info("Found discount for this seller.")
+                #logging.info(line)
+                self.discount = float(line.rpartition(("Postage discount from seller").lstrip().strip('£'))[2].rpartition(":")[2].lstrip())
+                self.seller = line.rpartition("Postage discount from seller")[2].rpartition(":")[0].strip()
+        #logging.info("Discount = %f",self.discount)
+        #if self.postage > 0:
+        #    self.postage -= self.discount
+        #    logging.info("%s postage = %f",self.seller, self.postage)
+        
+    # TODO Deal with postage discounts for multiples like:
+    # Postage discount from seller  bright_components : £1.98 
+    
+    
+#### END CLASS POSTAGE ########
 class Purchase:
     ''' A purchase from a single vendor and may be one or more items.
     Probably should be called purchase?
@@ -96,6 +139,7 @@ class Purchase:
     vendor = None # from a single vendor
     purchase_data = None
     guid = None
+    #postage = Postage(None)
 
     def __init__(self, purchase_data):
         self.guid = uuid.uuid4()
@@ -106,7 +150,9 @@ class Purchase:
         #logging.info("\n\n"+str(self.guid)+"\n"+str(self.purchase_data)) ## DEBUG
         self.parse_vendor(self.purchase_data)
         self.parse_purchase(self.purchase_data)
-
+        #self.postage_item = self.parse_postage(self.purchase_data)
+        self.do_postage(self.purchase_data)
+        
     def parse_vendor(self, data):
         self.vendor.name=data[0].rpartition('Seller:')[2].lstrip(' ') # Always
         if data[3] [0:3] != '---':
@@ -118,7 +164,6 @@ class Purchase:
                 self.vendor.addr.append(data[i].lstrip(' ').rstrip(' '))
         else: 
             self.vendor.addr_name = data[0].rpartition('Seller:')[2].lstrip(' ')
-            #self.vendor.addr.append(data[0].rpartition('Seller:')[2].lstrip(' ') )
             self.vendor.addr.append("Ebay")
 
     def parse_purchase(self, data):
@@ -139,7 +184,20 @@ class Purchase:
         for item in self.items:
             item.print_items()
         return
-
+        
+    def do_postage(self, data):
+        postage_object = Postage(data)
+        postage = postage_object.postage
+        if postage_object.seller == self.vendor.name:
+            postage -= postage_object.discount
+        item = Item(None)
+        item.attribs['Item name'] = "Postage and packing" 
+        item.attribs['Quantity'] = 1 
+        item.attribs['Price'] = postage
+        self.items.append(item)
+        
+        
+        
     def get_items(self):
         return self.items
 
@@ -152,9 +210,8 @@ class Purchase:
 class EbayMail():
     purchases = [] # List of Purchases in email, usually just the one but mutiples are possible.
     mail_date = ''
-    def __init__(self,billmail, cashfile, account):
+    def __init__(self,billmail, cashfile):
         self.INFILE = billmail
-        self.account = account
         f = open(self.INFILE)
         self.msg = email.message_from_file(f)
         f.close()
@@ -172,7 +229,10 @@ class EbayMail():
         Collect the indices of where the serch terms occur, then split the file
         using the indices and send these chunks for further parsing.
         '''
+        #logging.info(type(plist))
+        #print plist
         idxs = [] # list of occurrences.
+        pdidx = None
         for line in plist:
             if line.find("Date: ") != -1:
                 self.mail_date = line.rpartition("Date: ")[2].lstrip(' ')
@@ -182,15 +242,18 @@ class EbayMail():
             if line.find("Subtotal:") != -1:
                 #print line
                 idxs.append(plist.index(line))
-        #logging.info(str(idxs))
-        # Each section we have defined above is a purchase
+            if line.find("Postage discount from seller ") != -1:
+                pdidx = plist.index(line)
+                #logging.info(plist[pdidx])
+            idxs.sort()
+            #logging.info(idxs)
         for i in range(len(idxs)-1):
-            purchase = Purchase(plist[idxs[i]:idxs[i+1]])
+            pl = plist[idxs[i]:idxs[i+1]]
+            if pdidx: pl.append(plist[pdidx])
+            #logging.info(pl)
+            purchase = Purchase(pl)
             self.purchases.append(purchase)
-
-    def parse_totals(self,plain):
-
-        return
+            
 
 ##### END CLASS EBAYBILL ############
 
@@ -237,17 +300,16 @@ if __name__ == "__main__":
 
     try: MAILFILES = sys.argv[2:]# May be more than one
     except: MAILFILES = "Confirmation of your order of Voltage Regulator LM7805 LM7812 LM317T Adjustable Linear 7805 7812 UK..."
-    #sys.exit(1)
     for MAILFILE in MAILFILES:
         print "foo",MAILFILE,"bar"
         #continue
-        ebay_mail = EbayMail(MAILFILE,GNUFILE, ACCOUNT)
+        ebay_mail = EbayMail(MAILFILE,GNUFILE)
         plain = ebay_mail.get_plain_mail(ebay_mail.msg)
         plist = plain.lstrip(' ').decode('ascii','ignore').encode('utf8').split('\n')
         ebay_mail.parse_mail(plist)
         
-        #quit()
-        # Parsing done, now insert the data into GnuCash
+        #sys.exit(1)
+        print "\nParsing done, now inserting the data into GnuCash\n"
         # ooh jthis innefficient FIXME
         pysession = pycash.Session(GNUFILE)
         pysession.open()
