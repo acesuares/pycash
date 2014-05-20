@@ -58,7 +58,6 @@ class Item:
                         "Item number:", #
                         "transaction::",  #
                         "Price:", #
-                        #"P&amp;P price:", # This is a special case and needs to be handled.  FIXME
                         "Quantity:", #
                         "Item total:",  #
                         "Paid on ",
@@ -196,6 +195,7 @@ class EbayMail():
         self.INFILE = billmail
         f = open(self.INFILE)
         self.msg = email.message_from_file(f)
+        if self.msg == None: return # Should raise an exception too.
         f.close()
         self.test_subject(self.msg)
         
@@ -247,9 +247,6 @@ if __name__ == "__main__":
     '''
     We can recieve input that looks like:
     "/home/mikee/claws_mail/E Bay/269" "/home/mikee/claws_mail/E Bay/327" "/home/mikee/claws_mail/E Bay/326" "/home/mikee/claws_mail/E Bay/265" "/home/mikee/claws_mail/E Bay/335" "/home/mikee/claws_mail/E Bay/285" "/home/mikee/claws_mail/E Bay/303" "/home/mikee/claws_mail/E Bay/307"
-    /home/mikee/claws_mail/E Bay/269
-    Note the last one isn't quoted and is a copy of the first one. :(
-    So we either parse this input or we gat called mutipl times and use locking. :(
     '''
     
     # Test for insufficient args
@@ -273,6 +270,7 @@ if __name__ == "__main__":
         for p in ebay_mail.purchases:
             pysession.make_invoice_from_purchase(p)
         pysession.close(save = True)
+        print "\nFinished\n"
 
 
 

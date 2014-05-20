@@ -5,6 +5,7 @@ An object to represent averything in a Gnucash Invoice/Bill
 '''
 
 import sys,os
+from os.path import expanduser
 import csv
 import logging
 import datetime
@@ -12,8 +13,11 @@ from decimal import Decimal
 import ConfigParser
 
 
+HERE = os.path.dirname(os.path.realpath(__file__))
+HOME = expanduser("~")
+
 Config = ConfigParser.ConfigParser()
-Config.read("pybay.conf")
+Config.read(HOME+"/.pybay.conf") # This needs to be in users home dir.
 
 logging.basicConfig(level=logging.DEBUG, 
         format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
@@ -25,7 +29,7 @@ sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-package
 import gnucash
 import gnucash.gnucash_business
 
-HERE = os.path.dirname(os.path.realpath(__file__)) 
+ 
 # Change the next set of values to match your actual CnuCash account setup.
 # The inflexability of accounts here may not suit everybodys taste but bills can always
 # be altered later.
