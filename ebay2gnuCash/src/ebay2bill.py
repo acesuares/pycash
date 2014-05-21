@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
+# Copyright 2014 Mike Evans <mikee@mutant-ant.com>
 # Create a GnuCash bill froman e-bay e-mail confirmation.
 # This is command line version.
 # A GUI version could just take pasted text from e-mails

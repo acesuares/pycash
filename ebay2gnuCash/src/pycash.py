@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
+# Copyright 2014 Mike Evans <mikee@mutant-ant.com>
 '''
 An object to represent averything in a Gnucash Invoice/Bill
 '''
@@ -44,7 +45,7 @@ except ConfigParser.Error as e:
     print "\n\nProblems reading config file.  Check values.\n"
     print e
     sys.exit(1)
-logging.debug(type(XFER_ACCOUNT))
+#logging.debug(type(XFER_ACCOUNT))
 
 class Session():
     def __init__(self, ):
@@ -73,6 +74,47 @@ class Session():
         assert(self.payable != None)
         
         
+    def get_bills(self, is_paid = True, is_active = True):
+        ''' 
+        Get and return a list of Invoice objects
+        Not using the params here but leave then here anyway for reference
+        @param is_paid True or False
+        @param is_active True or False
+        '''
+
+        query = gnucash.Query()
+        query.search_for("gncInvoice")
+        query.set_book(self.book)
+
+        #query.add_boolean_match([gnucash.INVOICE_IS_PAID], is_paid, gnucash.QOF_QUERY_AND)
+
+        # active = JOB_IS_ACTIVE
+        #query.add_boolean_match(gnucash.JOB_IS_ACTIVE, is_active, gnucash.QOF_QUERY_AND)
+
+        # return only invoices (1 = invoices, 2 = bills)
+        pred_data = gnucash.QueryInt32Predicate(gnucash.QOF_COMPARE_EQUAL, 2)
+        query.add_term([gnucash.INVOICE_TYPE], pred_data, gnucash.QOF_QUERY_AND)
+
+        invoices = []
+
+        for result in query.run():
+            #invoices.append(gnucash_simple.invoiceToDict(gnucash.gnucash_business.Invoice(instance=result)))
+            invoices.append(gnucash.gnucash_business.Invoice(instance=result))
+        
+        query.destroy()
+
+        #return json.dumps(invoices)
+        return invoices
+        
+        
+    def test_exists_billingID(self,bid):
+        bill_list = self.get_bills(self)
+        for bill in bill_list:
+            if bill.GetBillingID() == str(bid): return True
+            else: return False
+        
+        
+
     def close(self,save = False):
         if save: self.session.save() #
         self.session.end()
@@ -152,16 +194,23 @@ class Session():
             
         vendor =  self.book.VendorLookupByID(vid)
         logging.info(vendor.GetName())
-        bill_num = po.items[0].attribs['transaction']
+        billingID = po.items[0].attribs['transaction']
         # Check for duplicate invoice IDs
-        test = self.book.BillLoookupByID(bill_num)
-        logging.info(bill_num)
-        if test:
-            if test.GetID() == bill_num:
-                print "We have a duplicate Bill ID.  Do a manual insert if required"
-                return
+        # I'd like to assign my own Bill numbers here abd assign the transaction number to 
+        # it's Billing ID but then I need a way to find duplicates.  So how to 
+        # iterate over the invoices to search Billing IDs?
+        #invoices = self.get_invoices()
+        #test = self.book.BillLoookupByID(bill_num)
+        test = self.test_exists_billingID(billingID)
+        logging.info(billingID)
+        if test == True:
+            print "We have a duplicate Bill ID.  Do a manual insert if required"
+            return
+        bill_num = self.book.BillNextID(vendor)
         bill = gnucash.gnucash_business.Bill(self.book, bill_num, self.currency, vendor ) 
         bill.SetNotes("Transaction ID: " + po.items[0].attribs['transaction'])
+        bill.SetBillingID(str(po.items[0].attribs['transaction']))
+
         assert(isinstance(bill, gnucash.gnucash_business.Invoice))
         bill.SetDateOpened(self.bill_date)
         # Add each line item entry
@@ -200,6 +249,13 @@ class Session():
 
 if __name__ == "__main__":
     #print Config.items("CONFIG")
+    session = Session()
+    session.open()
+    invoices = session.get_bills(True, True)
+    for invoice in invoices:
+        if invoice.GetBillingID() != "": 
+            print invoice.GetBillingID()
+    session.close()
     pass
     
     
