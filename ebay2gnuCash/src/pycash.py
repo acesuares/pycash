@@ -54,11 +54,18 @@ class Session():
         return
         
     def open(self):
+        ''' This uses the GnuCash XLM file as a data store.  If you are experimenting 
+        with DB atorage you will have to edit this section to suit. Note that GnuCash
+        recommends using the XML file storage for production use as the database storage
+        is still in development and should only be used for testing.
+        '''
         try:
           self.session = gnucash.Session("xml://%s" % self.gnufile, False, True)
         except gnucash.GnuCashBackendException as (errno):
           print "{0}".format(errno)
-          print "An error occurred. Stopping"
+          print "Stopping.  Is Gnucash running?  Make sure GnuCash is not running \
+                and that if you are using an XML file storage make sure that a \
+                lock file doesn't exist in the gnucash file directory."
           quit(1)
 
 
