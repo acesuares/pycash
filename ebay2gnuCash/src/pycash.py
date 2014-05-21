@@ -111,7 +111,7 @@ class Session():
         bill_list = self.get_bills(self)
         for bill in bill_list:
             if bill.GetBillingID() == str(bid): return True
-            else: return False
+        return False
         
         
 
