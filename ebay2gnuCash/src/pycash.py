@@ -193,7 +193,7 @@ class Session():
         vid = self.vendor_search(v_name, 100)[0]
             
         vendor =  self.book.VendorLookupByID(vid)
-        logging.info(vendor.GetName())
+        logging.debug(vendor.GetName())
         billingID = po.items[0].attribs['transaction']
         # Check for duplicate invoice IDs
         # I'd like to assign my own Bill numbers here abd assign the transaction number to 
@@ -204,7 +204,7 @@ class Session():
         test = self.test_exists_billingID(billingID)
         logging.info(billingID)
         if test == True:
-            print "We have a duplicate Bill ID.  Do a manual insert if required"
+            print "We have a duplicate Billing ID.  Do a manual insert if required"
             return
         bill_num = self.book.BillNextID(vendor)
         bill = gnucash.gnucash_business.Bill(self.book, bill_num, self.currency, vendor ) 

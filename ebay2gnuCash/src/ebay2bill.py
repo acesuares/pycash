@@ -194,6 +194,7 @@ class EbayMail():
     mail_date = ''
     def __init__(self,billmail):
         self.INFILE = billmail
+        self.purchases = []
         f = open(self.INFILE)
         self.msg = email.message_from_file(f)
         if self.msg == None: return # Should raise an exception too.
@@ -254,10 +255,12 @@ if __name__ == "__main__":
     if len(sys.argv) < 1:
         print "No arguments supplied"
         sys.exit(1)
-
+        
+    pysession = pycash.Session()
+    pysession.open()
     MAILFILES = sys.argv[1:]# May be more than one
     for MAILFILE in MAILFILES:
-        print "foo",MAILFILE,"bar"
+        logging.debug(MAILFILE)
         #continue
         ebay_mail = EbayMail(MAILFILE)
         plain = ebay_mail.get_plain_mail(ebay_mail.msg)
@@ -266,12 +269,10 @@ if __name__ == "__main__":
         
         #sys.exit(1)
         print "\nParsing done, now inserting the data into GnuCash\n"
-        pysession = pycash.Session()
-        pysession.open()
         for p in ebay_mail.purchases:
             pysession.make_invoice_from_purchase(p)
-        pysession.close(save = True)
-        print "\nFinished\n"
+    pysession.close(save = True)
+    print "\nFinished\n"
 
 
 
