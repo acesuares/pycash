@@ -99,7 +99,7 @@ class Session():
         # active = JOB_IS_ACTIVE
         #query.add_boolean_match(gnucash.JOB_IS_ACTIVE, is_active, gnucash.QOF_QUERY_AND)
 
-        # return only GNC_INVOICE_VEND_INVOICE type from  gnucash.gnucash_core_c.
+        # return only GNC_INVOICE_VEND_INVOICE type. From  gnucash.gnucash_core_c.
         pred_data = gnucash.QueryInt32Predicate(gnucash.QOF_COMPARE_EQUAL, GNC_INVOICE_VEND_INVOICE)
         query.add_term([gnucash.INVOICE_TYPE], pred_data, gnucash.QOF_QUERY_AND)
 
