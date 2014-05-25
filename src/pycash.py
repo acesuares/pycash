@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.DEBUG,
 sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-packages')
 import gnucash
 import gnucash.gnucash_business
+from gnucash.gnucash_core_c import * # Type definitions.
 
  
 # Change the next set of values to match your actual CnuCash account setup.
@@ -55,7 +56,7 @@ class Session():
         
     def open(self):
         ''' This uses the GnuCash XLM file as a data store.  If you are experimenting 
-        with DB atorage you will have to edit this section to suit. Note that GnuCash
+        with DB storage you will have to edit this section to suit. Note that GnuCash
         recommends using the XML file storage for production use as the database storage
         is still in development and should only be used for testing.
         '''
@@ -84,7 +85,7 @@ class Session():
     def get_bills(self, is_paid = True, is_active = True):
         ''' 
         Get and return a list of Invoice objects
-        Not using the params here but leave then here anyway for reference
+        Not using the params here but leave them here anyway for reference
         @param is_paid True or False
         @param is_active True or False
         '''
@@ -98,8 +99,8 @@ class Session():
         # active = JOB_IS_ACTIVE
         #query.add_boolean_match(gnucash.JOB_IS_ACTIVE, is_active, gnucash.QOF_QUERY_AND)
 
-        # return only invoices (1 = invoices, 2 = bills)
-        pred_data = gnucash.QueryInt32Predicate(gnucash.QOF_COMPARE_EQUAL, 2)
+        # return only GNC_INVOICE_VEND_INVOICE type from  gnucash.gnucash_core_c.
+        pred_data = gnucash.QueryInt32Predicate(gnucash.QOF_COMPARE_EQUAL, GNC_INVOICE_VEND_INVOICE)
         query.add_term([gnucash.INVOICE_TYPE], pred_data, gnucash.QOF_QUERY_AND)
 
         invoices = []
@@ -203,11 +204,6 @@ class Session():
         logging.debug(vendor.GetName())
         billingID = po.items[0].attribs['transaction']
         # Check for duplicate invoice IDs
-        # I'd like to assign my own Bill numbers here abd assign the transaction number to 
-        # it's Billing ID but then I need a way to find duplicates.  So how to 
-        # iterate over the invoices to search Billing IDs?
-        #invoices = self.get_invoices()
-        #test = self.book.BillLoookupByID(bill_num)
         test = self.test_exists_billingID(billingID)
         logging.info(billingID)
         if test == True:
