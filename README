@@ -1,4 +1,4 @@
-= Take an e-bay confirmation email and create a bill in GnuCash
+= Take an e-bay Confirmation email and Create a Bill in GnuCash
 
 GnuCash users, do you ever shop on EBay?  Of course you do.  Is it a real pain to record those purchases in GnuCash?  Hell yes.  This is the functionalty for you especially if you are a claws-mail user too.
 
@@ -8,6 +8,10 @@ This uses the GnuCash XLM file as a data store.  If you are experimenting
 with DB atorage you will have to edit the Session class to suit. Note that GnuCash
 recommends using the XML file storage for production use as the database storage
 is still in development and should only be used for testing.
+
+== Installing
+
+Just unzip the two files and put them somewhere from where they can be run.  Or do "python setup.py install" as root to install it for all users.
 
 == Setting Up
 
@@ -24,5 +28,11 @@ This software is beerware, if you use it and like it send me some money for a be
 https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3SQCKHY7AU3JU
 
 Please donate because, honestly, I need the money for food. 
+
+== Disclamer
+
+Use this software at your OWN RISK.  I take NO reposibility for loss of data from using this software.  ALWAYS unsure you have a backup of your data.  TEST this software on a test file to ensure that it does what you think it does and ensure the result match your expectations.
+
+This is NOT in ANY way affiliated to GnuCash.  Do NOT use the GnuCash mailing list to ask questions about this software.  Use either the GitHub issues reporter to air any problems you may encounter.  I *may* set up a forum if the email volume becomes and issue for me.
 
 
