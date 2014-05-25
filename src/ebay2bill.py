@@ -118,7 +118,6 @@ class Postage():
 #### END CLASS POSTAGE ########
 class Purchase:
     ''' A purchase from a single vendor and may be one or more items.
-    Probably should be called purchase?
     '''
     items = None # A Purchase has one or more items
     vendor = None # from a single vendor
