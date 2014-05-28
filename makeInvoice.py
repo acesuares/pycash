@@ -22,6 +22,7 @@
 
 import os
 import sys
+# Append the path to GnuCash Site packages.  Change this for your system
 sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
 
 import backend_errors
@@ -43,6 +44,7 @@ SALE_AMOUNT = 0
 SALE_COMMENT = ''
 CURRENCY = {'GBP':'gbp'}
 URI = ''
+# The GnuCash file.  Change this for your file.
 FILE = "/home/mikee/Projects/pycash/example.gnucash"
 
 '''
