@@ -50,7 +50,7 @@ except ConfigParser.Error as e:
 
 class Session():
     def __init__(self, ):
-        self.gnufile = HERE + "/" + Config.get("CONFIG","GNUFILE");
+        self.gnufile = Config.get("CONFIG","GNUFILE");
         #logging.debug(self.gnufile)
         return
         
@@ -211,7 +211,7 @@ class Session():
             return
         bill_num = self.book.BillNextID(vendor)
         bill = gnucash.gnucash_business.Bill(self.book, bill_num, self.currency, vendor ) 
-        bill.SetNotes("Transaction ID: " + po.items[0].attribs['transaction'])
+        #bill.SetNotes("Transaction ID: " + po.items[0].attribs['transaction'])
         bill.SetBillingID(str(po.items[0].attribs['transaction']))
 
         assert(isinstance(bill, gnucash.gnucash_business.Invoice))
