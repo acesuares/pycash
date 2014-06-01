@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.DEBUG,
 #root_logger.disabled = False # Set to True do disable logging.
 
 # Add the Gnucash Python stuff
-sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-packages')
+sys.path.append('/home/mikee/progs/gnucash-maint/lib/python2.7/site-packages')
 import gnucash
 import gnucash.gnucash_business
 from gnucash.gnucash_core_c import * # Type definitions.
