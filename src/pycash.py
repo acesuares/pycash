@@ -234,7 +234,7 @@ class Session():
             entry.SetBillTaxIncluded(False)
             
         if POST_BILL: txn = bill.PostToAccount(self.payable,
-                        self.bill_date, self.bill_date, "Yay!", True, False)
+                        self.bill_date, self.bill_date, "", True, False)
         
         if POST_BILL:#Pay FIXME ? Or don't.
             '''vendor.ApplyPayment(bill,
