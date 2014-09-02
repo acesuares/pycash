@@ -23,7 +23,9 @@
 # FIXED:  For some reason all of the Customers and Vendors are lost during this process
 #   I'm convinced it's not anything in here.  But then I'm often very wrong
 #   when it comes to understanding GnuCash.
-
+import os
+import sys
+sys.path.append('/home/mikee/progs/gnucash-maint/lib/python2.7/site-packages')
 import gnucash
 from  gnucash import Session
 import gnucash.gnucash_business
@@ -31,8 +33,6 @@ import gnucash.gnucash_business
 from gnucash.gnucash_core_c import *
 from gnucash.gnucash_business import *
 from gnucash.gnucash_core import *
-import os
-import sys
 from datetime import date
 from decimal import Decimal
 for arg in sys.argv:
@@ -65,7 +65,7 @@ def gnc_numeric_from_decimal(decimal_value):
 
 # Very basic try for database opening.
 try:
-  session = Session('/home/mikee/Docs/MEC/gnucash/MEC-test.gnucash', True, False, False)
+  session = Session('/home/mikee/Projects/pycash/payroll/src/pay-test.gnucash', True, False, False)
 except GnuCashBackendException:
   print "ERROR:  Cannot create session.  Quitting.  Do have GnuCash open?"
   quit()
@@ -78,7 +78,6 @@ sales = root.lookup_by_name('Sales')
 bank  = root.lookup_by_name('Business Account')
 assets = root.lookup_by_name("Assets")
 recievables = assets.lookup_by_name("Accounts Recievable")
-income = root.lookup_by_name("Sales")
 comm_table = book.get_table()
 gbp = comm_table.lookup("CURRENCY", "GBP")
 
@@ -141,7 +140,7 @@ split3.SetValue(num)
 split3.SetAccount(bank)
 split3.SetParent(trans2) # For some reason we have to do this twice
 trans2.SetCurrency(gbp)  # It fails the first time, then succeeds, else
-trans1.SetCurrency(gbp)  # It fails the first time, then succeeds, else
+#trans1.SetCurrency(gbp)  # It fails the first time, then succeeds, else
 split3.SetParent(trans2) # it just crashes
 
 trans2.SetDescription("Sold some stuff")
