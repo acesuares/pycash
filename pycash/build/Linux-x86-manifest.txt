@@ -1,0 +1,7 @@
+/home/mikee/Projects/pycash/logmake D92C1ED5-4861-1FB9-BC4A-EEFF5CBC77F5 zlib
+/home/mikee/Projects/pycash/makeInvoice.py B8AF2B38-D039-70C2-7B84-4F9BDAAA2F1A zlib
+/home/mikee/Projects/pycash/makeSale.py C5477D67-563B-0078-4ECB-662F79388022 zlib
+/home/mikee/Projects/pycash/pycash/build.log 1976A3BB-76ED-7E83-69E0-F06223A4B162 zlib
+/home/mikee/Projects/pycash/pycash/pycash.mpi 90C77FFA-96BD-D75F-978D-353F9EE0F20D zlib
+/home/mikee/Projects/pycash/pycash/build/Linux-x86-main.tcl 1C77DF30-9646-CD0F-529D-F0C8D88A3C6E zlib
+/home/mikee/Projects/pycash/pycash/build/messages 6F1BE68E-A422-03B2-7BA0-31FCC074FB0B zlib
