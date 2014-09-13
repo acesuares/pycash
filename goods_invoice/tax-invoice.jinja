@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<!-- ====================================================================== -->
+<!-- The HTML for the invoice starts here -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Goods Invoice {{ invoice_id }}</title>
+
+
+<link rel="stylesheet" href="file:////home/mikee/.gnucash/taxinvoice.css" type="text/css">
+<!-- Note that the external stylesheet file is overridden by this following: -->
+<style type="text/css">
+  body { 
+    font: normal normal 12pt "Sans";
+  }
+  table { /* table does not inherit font */
+    font: normal normal 12pt "Sans";
+    border-collapse:collapse;
+    #<unspecified>
+  }
+  table[border="1"] th {
+    border-color:black;
+  }
+  table[border="1"] td {
+    border-color:black;
+  }
+
+  h1.coyname {
+    font: bold normal 20pt "Sans";
+  }
+  h1.coyname { text-align: left; }
+</style>
+
+</head>
+<body>
+
+<div class="main">
+
+<!-- company info -->
+<table class="coytable" border="0" width="100%">
+<tr valign="top" style="vertical-align: top">
+  
+  <td align="left">
+    <h1 class="coyname">Mike Evans</h1>
+  </td>
+  <td align="right"><h2 class="invoice">Goods Invoice
+    
+  </h2></td>
+</tr>
+</table>
+<table border="0" width="100%">
+<tr valign="top">
+  <td align="left">
+      XX Some Street<br>Narberth<br>Pembs<br>SA67 XXX<br>
+  </td>
+  <td align="right">
+    <table border="0">
+        <tr>
+          <th colspan="2" align="right">Mike Evans</th>
+        </tr>
+        <tr>
+          <td align="right">Phone:&nbsp;</td>
+          <td align="right">(+44) 1834 86XXXX</td>
+        </tr>     
+        <tr>
+          <td align="right">Email:&nbsp;</td>
+          <td align="right">mikee@example.co.uk</td>
+        </tr>
+        <tr>
+          <td align="right">Website:&nbsp;</td>
+          <td align="right">http://www.example.co.uk</td>
+        </tr>
+    </table>
+</tr>    
+</table>
+<hr>
+
+<table border="0" width="100%">
+<tr valign="top">
+  <!-- customer info -->
+  <th align="right" width="1%">To: </th>
+  <td align="left">
+    
+        {{ customer_name }}<br>
+      {{cust_contact}}<br>{{addr_1}}<br>{{addr_2}}<br>{{addr_3}}<br>{{addr_4}}
+  
+  </td>
+  <!-- invoice number etc. -->
+  <td align="right">
+    <table border="0">
+      <tr>
+        <td align="right" class="invnum"><big><strong><nobr>Invoice number:&nbsp;</nobr></strong></big></td>
+        <td align="right" class="invnum"><big><strong>{{invoice_id}}</strong></big></td>
+      </tr>
+        <tr>
+           <td align="right"><nobr>Invoice&nbsp;Date</nobr>:&nbsp;</td>
+           <td align="right">{{date_posted}}</td>
+        </tr>
+        <tr>
+           {% if is_paid %}
+           <td align="right">Paid</td>
+           {% else %}
+            <td align="right"><nobr>Due&nbsp;Date</nobr>:&nbsp;</td>
+            <td align="right">{{date_due}}</td>
+           {% endif %}
+        </tr> 
+        {% if job_name %}
+          <tr>
+            <td align="right">Job name: {{job_name}}</td>
+            <td align="right"> </td>
+          </tr>
+        {% endif %}
+    </table>
+  </td>
+</tr>
+</table>
+
+<!-- invoice lines table -->
+<p>
+<table border="1" width="100%" cellpadding="4" class="entries"> 
+  <thead>
+    <tr bgcolor="#ccc" valign="bottom">
+      <th align="center" >Date</th>
+      <th align="left" width="80%">Description</th>
+        <th align="left">Units</th>
+        <th align="right">Qty</th>
+        <th align="right">Unit Price</th>
+      <th align="right">Total Price</th>
+    </tr>
+  </thead>
+
+  <tbody> <!-- display invoice entry lines, keeping running totals -->
+  {% for da,de,q,a,p,lp,acc in zipped %}
+    {% if acc != "Reimbersed Postage" %}
+      <tr valign="top">
+        <td align="center" ><nobr>{{da}}</nobr></td>
+        <td align="left">{{de}}</td>
+        <!-- td align="left">< ?scm:d (gncEntryGetNotes entry) ?></td -->
+          <td align="left">{{a}}</td>
+          <td align="right">{{q}}</td>
+          <td align="right"><nobr>£ {{p}}</nobr></td>
+        <!-- TO DO: need an option about whether to display the tax-inclusive total? -->
+        <td align="right"><nobr>£ {{lp}}</nobr></td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+    
+    <tr valign="top">
+      <td align="left" class="total" colspan="5"><strong>
+       Subtotal</strong></td>
+      <td align="right" class="total"><strong><nobr>£ {{goods}}</nobr></strong></td>
+    </tr>
+    
+     {% for da,de,q,a,p,lp,acc in zipped %}
+    {% if acc == "Reimbersed Postage" %}
+    <tr valign="top">
+      <td align="left" class="total" colspan="5">
+        <strong>{{de}}</strong></td>
+      <td align="right" class="total"><strong><nobr>£ {{lp}}</nobr></strong></td>
+    </tr>
+      {% endif %}
+    {% endfor %}
+    
+
+    <!-- subtotals row -->
+    
+
+    
+    
+
+    <!-- total row for local currency-->
+    <tr valign="top">
+      <td align="left" class="total" colspan="5"><strong>
+        Invoice Total</strong></td>
+      <td align="right" class="total"><strong><nobr>£ {{due}}</nobr></strong></td>
+    </tr>
+    <!-- optional total row for BitCoins -->
+    {% if bitcoins %}
+    <tr valign="top">
+      <td align="left" class="total" colspan="5"><strong>
+        Invoice Total</strong></td>
+      <td align="right" class="total"><strong><nobr>BTC {{btc_due}}</nobr></strong></td>
+    </tr>
+    {% endif %}
+    
+    <!-- payment rows Probably need another loop for multiple payments-->
+    {% if is_paid %}
+<!-- FIX ME
+    <tr valign="top">
+      <td align="left" class="total" colspan="5"><strong>
+        Payments</strong></td>
+      <td align="right" class="total"><strong><nobr>£ {{payments}}</nobr></strong></td>
+    </tr>
+-->
+    <tr valign="top">
+      <td align="left" class="total" colspan="5"><strong>
+        Amount Due</strong></td>
+      <td align="right" class="total"><strong><nobr>0.00</nobr></strong></td>
+    </tr>
+    {% endif %}
+    
+    
+  </tbody>
+   <!-- end of (let) surrounding table body -->
+</table>
+{% if notes %}
+   <p>{{notes}}</p>
+{% endif %}
+ 
+<p>Make payments to:</br>
+Robbing Bastards Bank</br>
+Anytown branch</br>
+20-00-00</br>
+12345678</p>
+{% if bitcoins %}
+<p>Make BitCoin payments by either scanning the QRCode.</p>
+<img src="{{cwd}}qr.png"></br></br>
+Or use the BitCoin address: {{bitcoin_address}}
+</p>
+{% endif %}
+<p>Thank you for your custom.</p>
+</div>
+</body>
+</html>
+

@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.DEBUG,
 #root_logger.disabled = False # Set to True do disable logging.
 
 # Add the Gnucash Python stuff
-sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
+sys.path.append('/home/mikee/progs/gnucash-Bug-730255/lib/python2.7/site-packages')
 import gnucash
 import gnucash.gnucash_business
 from gnucash.gnucash_core_c import * # Type definitions.
@@ -49,11 +49,10 @@ except ConfigParser.Error as e:
 #logging.debug(type(XFER_ACCOUNT))
 
 class Session():
-    def __init__(self):
+    def __init__(self, ):
         self.gnufile = Config.get("CONFIG","GNUFILE");
         #logging.debug(self.gnufile)
-        #self.gnufile = "../example.gnucash"
-        #return
+        return
         
     def open(self):
         ''' This uses the GnuCash XLM file as a data store.  If you are experimenting 

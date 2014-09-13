@@ -8,7 +8,7 @@ Some Python utilites that GnuCash users may find useful.
 
 === delete_ALL_transactions.py
 
-Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the busuness data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.
+Deletes ALL transactions older than the time specified.  Currently the cutoff date is coded in the file.  Leaves all the business data intact.  Test it before using in anger and send any updates back to me in the usual GitHub manner.  WARNING this alters your GnuCash file directly and is non-reversable, once it's gone it's gone.  Direct editing of the GnuCash file is not endorsed by GnuCash.  ALWAYS MAKE A BACKUP before runnning this or ANY of the scripts here.
 
 === make_invoice.py
 
@@ -36,6 +36,10 @@ Gets stock quotes from yahoo.  Useage info is in the file.
 === get_customers_from_xml.py
 
 Get customer data from the GnuCash XML file and output in a form suitable for direct import back int GnuCash via the import plugin. It doesn't as yet work correctly for vendors, (TODO).  Works by parsing the XML file directly rather than through GnuCash's API.  Makes no changes to the source file.  Take two paramters; the file_path and a either customers or vendors (actually you can use c or v as only the first letter is required). Output is to stdout so redirect this into file as required.
+
+=== paypal2gnucash.py
+
+Get transaction data as a CSV download from PayPal use this script to convert it to a format suitable for import into gnucash.  If foriegn currencies (not GBP in this case) are involved then it gets the converted GBP price not the transaction currency.  User in other locales can edit the file to suit their currency.
 
 == Disclaimer
 
