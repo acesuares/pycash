@@ -56,17 +56,12 @@ class Item:
     attribs = None
     guid = None
     item_search_terms=( "Item name", #
-                        "Item name:", #
-                        "Item number:", #
-                        "transaction::",  #
+                        "Item number", #
                         "Price:", #
-                        "Sale price:", #
-                        "Sale date:", #
-                        "Quantity:", #
-                        "Quantity sold:",
-                        "Item total:",  #
+                        "Quantity", #
+                        "Item total",  #
                         "Paid on ", #
-                        "transaction::") #
+                        "transaction") #
 
     def __init__(self, item_data):
         # Object attributes
