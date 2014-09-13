@@ -1,0 +1,23 @@
+Employer's Name,,,Tax Year,,,Accounts Office Ref,,,PAYE Ref
+Millstream Computing,,,2014,,,123PA12345678,,,123/A456
+
+Employee's Full Name,,,Employee's Address,,,National Insurance Number,,Payroll ID,,
+Mike  Evans,,,17 Church Street Narberth   SA67 7BH,,,,,0001,,
+
+Payment Date,,Payment Tax Period,,Payment NI Period,,Payment Taxcode Full,,Payment NI Letter,,Payment Pay Frequency
+2014-08-01,,4,,4,,1000L wk1mth1,,A,,M1,,
+
+Payment Pay For Tax,,Payment Pay For NICs,,Payment SSP,,Payment SMP,,Payment SAP,,Payment ASPP,,Payment OSPP
+2000.00,,2000.00,,0.00,,0.00,,0.00,,0.00,,0.00,,
+
+Benefits Taxed via Payroll,,Benefits Subject to Class 1a NICs,,Pension Contributions Paid,,Pension Contributions Not Paid,,Gross Pay For Tax,,Gross Pay For NICs
+0.00,,0.00,,0.00,,0.00,,2000.00,,2000.00
+
+Total Tax Deducted,,Employee NICs,,Student Loan,,Net Pay After Statutory Deductions
+233.00,,160.44,,53.00,,1553.56
+
+Gross Pay YTD,,Total Tax Deducted YTD,,Employee Contributions YTD,,Student Loan YTD
+6500.00,,632.00,,461.76,,96.00
+
+"Please note:  If a mistimed payment has been added or changed, the data in this CSV file is not suitable for producing a payslip."
+You will still be able to use the CSV data as normal for future employee payments that are not mistimed.
