@@ -71,7 +71,7 @@ for row in Reader:
 			row[4] =  row[4] + row[5]
 		row[4] = row[4].replace(SEP, ":")
 		outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + row[1] + " > " + row[4] + SEP + "ea" + SEP +
-			ACCOUNT + SEP + row[2] + SEP + row[5].replace(MONEY, "") + SEP*4 + "no" + SEP*8)
+			ACCOUNT + SEP + row[2] + SEP + row[5].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
 		print outline
 
 # Deal with the footer rows		
@@ -79,12 +79,12 @@ for row in Reader:
 		if footerRow == 1: 
 			delivery = row[7].replace(MONEY, "")
 			outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + "DELIVERY" + SEP + "ea" + SEP +
-			"Business Expenses:Postage and Delivery" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*8)
+			"Business Expenses:Postage and Delivery" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
 			print outline # pipe to file for GnuCash import
 		if footerRow == 2: 
 			vat = row[7].replace(MONEY, "")
 			outline=(INV_ID + SEP*2 + VENDOR_ID + SEP*4 + "VAT" + SEP +"tax" +SEP +
-			"Business Expenses:VAT" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*8)
+			"Business Expenses:VAT" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
 			print outline # pipe to file for GnuCash import
 		footerRow += 1
 
