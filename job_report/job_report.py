@@ -1,6 +1,11 @@
 #!/bin/env python
 # -*- coding: iso-8859-15 -*-
-
+'''
+Create a job report from a GnuCash Job
+The current GnuCash Job report is not fit for purpose.  There is a bug 742329 filed
+to enhance the report but I'm not holding my breath.
+List all transactions connected to a job and summarise.
+'''
 import os,sys
 from os.path import expanduser
 import csv
