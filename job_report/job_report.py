@@ -27,7 +27,7 @@ import gnucash
 import gnucash.gnucash_business
 from gnucash.gnucash_core_c import * # Type definitions.
 
-templateLoader = jinja2.FileSystemLoader( searchpath = '.' )
+templateLoader = jinja2.FileSystemLoader( searchpath = HERE )
 templateEnv = jinja2.Environment( loader = templateLoader )
 TEMPLATE_FILE = "template.jinja"
 template = templateEnv.get_template( TEMPLATE_FILE )
