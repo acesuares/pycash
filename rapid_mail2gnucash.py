@@ -48,7 +48,7 @@ import csv
 import base64
 from datetime import datetime
 #from bs4 import BeautifulSoup
-
+from decimal import Decimal
 
 HOME = expanduser("~")
 VENDOR_ID ="000013" # Obviously this needs to match your vendor ID for this supplier
@@ -63,13 +63,12 @@ except:
 try:
     INV_ID=sys.argv[2]
 except:
-    print "No order number  specified."
+    print "No order number specified. Using the order number in the e-mail."
     print "Useage: Useage: rapid2gnucash.py  \"SAVED_RAPID_CONFIRMATION_MAIL\" \"ORDER_NUMBER\" \"OPT_ACCOUT\""
-    #quit(1)
 try:
     ACCOUNT=sys.argv[3]
 except:
-    ACCOUNT="Business Expenses:Bluestone" # Default if absent on the command line.  Edit to suit your account tree
+    ACCOUNT="Business Expenses" # Default if absent on the command line.  Edit to suit your account tree
 
 
 OUTFILE = INFILE + ".csv"
@@ -96,6 +95,7 @@ header = True
 items = False
 footer = False
 desc = ''
+running_total = Decimal(0.0)
 for line in data:
     if header:
         # Do the header stuff
@@ -126,6 +126,7 @@ for line in data:
             qty = line.split("Quantity:")[1].strip()
         elif line.strip().startswith("Unit Price:"):
             unit_price = line.split("Unit Price:")[1].split("£")[1].strip()
+            running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
             csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
             desc = ''
         elif line.find("Order Total") == 0: # Nearly done
@@ -133,9 +134,14 @@ for line in data:
             items = False
             footer = True
             #print line
-        #print line.find("Order Total")
     if footer:
         #print "footer"
+        # Cost per item shown on e-mail are rounded we need to adjust for that.
+        if line.strip().startswith("Total"):
+            print line
+            line = next(data)
+            amnt = line.split("£")[1].encode('utf8').strip()
+            csv_data.append(", , Rounding adjustment, " + str(Decimal(amnt) - running_total) + ", " + "1" + ", " + str(Decimal(amnt) - running_total))
         if line.strip().startswith("VAT"):
             line = next(data)
             amnt = line.split("£")[1].encode('utf8').strip()
@@ -173,12 +179,16 @@ for row in Reader:
         if row[2].strip() == "DELIVERY": 
             delivery = row[3].replace(MONEY, "")
             outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "DELIVERY" + SEP + "ea" + SEP +
-            "Business Expenses:Postage and Delivery" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
+            "Business Expenses" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
             #print outline # pipe to file for GnuCash import
+        elif row[2].strip() == "Rounding adjustment":
+            adjustment = row[3].replace(MONEY, "")
+            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "Rounding adjustment" + SEP +"ea" +SEP +
+            "Business Expenses" + SEP + "1" + SEP + adjustment + SEP*4 +  "no" + SEP*7)
         elif row[2].strip() == "VAT": 
             vat = row[3].replace(MONEY, "")
             outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "VAT" + SEP +"tax" +SEP +
-            "Business Expenses:VAT" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
+            "Business Expenses" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
             #print outline # pipe to file for GnuCash import
         footerRow += 1
     outline += os.linesep
@@ -188,12 +198,13 @@ for row in Reader:
 ofile.close()
 
 
-# Now insert the data into a MySQl database.
+# Now insert the data into a MySQl database.parts_auth.
 import MySQLdb
 import MySQLdb.cursors
 
 Reader = csv.reader(csv_data, delimiter=',')
-db = MySQLdb.connect(host = 'localhost', db = 'kicad_sqlparts',  user = 'mikee', passwd = 'pu5tu1e')
+import parts_auth # Users will have create this file with their db auth data
+db = MySQLdb.connect(host = parts_auth.host, db = parts_auth.db,  user = parts_auth.user, passwd = parts_auth.passwd)
 cur = db.cursor(MySQLdb.cursors.DictCursor)
 
 
@@ -216,4 +227,22 @@ cur.execute("DELETE FROM parts WHERE partnum = ''");
 # Trim any spaces
 cur.execute("update parts set partnum = trim(partnum)");
 cur.execute("update parts set descrip = trim(descrip)");
+db.commit()
+
+# Now update the multiples.
+# NB: This should be done somewhere above rather than a separate thing
+# TODO: Also for lengths, weights...
+cur.execute("SELECT * from parts")
+parts = cur.fetchall()
+
+for part in parts:
+    if 'Pack' in part['descrip']:
+        multi = part['descrip'].split('Pack')[1].strip()
+        if 'of' in multi:
+            multi = multi.split('of')[1].strip()
+        if 'Of' in multi:
+            multi = multi.split('Of')[1].strip()
+        print part['id'], multi
+        cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
+        cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
