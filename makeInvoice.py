@@ -23,7 +23,7 @@
 import os
 import sys
 # Append the path to GnuCash Site packages.  Change this for your system
-sys.path.append('/home/mikee/progs/gnucash-master/lib/python2.7/site-packages')
+sys.path.append('/home/mikee/progs/gnucash-custom/lib/python2.7/site-packages')
 
 import backend_errors
 import gnucash
@@ -35,7 +35,7 @@ import datetime
 from decimal import Decimal
 for arg in sys.argv:
     print arg # Or, more realistically assign them to our constants
-    
+
 
 
 BANK_ACC = ''

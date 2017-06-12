@@ -104,8 +104,12 @@ for line in data:
             print ord_num
         if line.startswith('Your Reference:'):
             line = next(data)
-            if not INV_ID : INV_ID = line.strip()
-            print  INV_ID
+            tmp = line.strip()
+            if tmp == '': # Then use the supplied INV_ID
+                pass
+            else:
+                INV_ID = tmp
+            print  "INV_ID = " + str(INV_ID)
         elif line.startswith('Order Date:'):
             line = next(data)
             date_str = line.strip().encode('utf8')
@@ -160,7 +164,7 @@ footer = False
 
 
 # Now format this to 
-#id,date_opened,vendor_id,,,,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
+#id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
 Reader = csv.reader(csv_data, delimiter=',')
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
 SEP = ',' # Field separator.
@@ -170,7 +174,7 @@ ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
 for row in Reader:
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
-        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + row[1] + " > " + row[2] + SEP + "ea" + SEP +
+        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " > " + row[2] + SEP + "ea" + SEP +
             ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
         
 
@@ -178,16 +182,18 @@ for row in Reader:
     else:
         if row[2].strip() == "DELIVERY": 
             delivery = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "DELIVERY" + SEP + "ea" + SEP +
+            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "DELIVERY" + SEP + "ea" + SEP +
             "Business Expenses" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
             #print outline # pipe to file for GnuCash import
         elif row[2].strip() == "Rounding adjustment":
             adjustment = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "Rounding adjustment" + SEP +"ea" +SEP +
-            "Business Expenses" + SEP + "1" + SEP + adjustment + SEP*4 +  "no" + SEP*7)
+            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*2 +
+                "Rounding is appled to the confirmation mail so this has to be accounted for here" +
+                SEP + date_opened + SEP + "Rounding adjustment" + SEP +"ea" + SEP +
+                "Business Expenses" + SEP + "1" + SEP + adjustment + SEP*4 +  "no" + SEP*7)
         elif row[2].strip() == "VAT": 
             vat = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*4 + "VAT" + SEP +"tax" +SEP +
+            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP +
             "Business Expenses" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
             #print outline # pipe to file for GnuCash import
         footerRow += 1
