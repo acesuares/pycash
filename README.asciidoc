@@ -43,7 +43,7 @@ Get transaction data as a CSV download from PayPal use this script to convert it
 
 === rapid_mail2gnucash.py
 
-I use mostly Rapid electronics for my components. Each time I order I at a confimation e-mail. This script, run from an action in claws-mail, creates a GnuCash importable CSV. It also populates my parts-stock database with the purchased items. 
+I use mostly Rapid Electronics for my components. Each time I order I get a confimation e-mail. This script, run from an action in claws-mail, creates a GnuCash importable CSV. It also populates my parts-stock database with the purchased items. 
 
 == Disclaimer
 
