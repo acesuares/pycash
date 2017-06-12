@@ -35,11 +35,15 @@ Gets stock quotes from yahoo.  Useage info is in the file.
 
 === get_customers_from_xml.py
 
-Get customer data from the GnuCash XML file and output in a form suitable for direct import back int GnuCash via the import plugin. It doesn't as yet work correctly for vendors, (TODO).  Works by parsing the XML file directly rather than through GnuCash's API.  Makes no changes to the source file.  Take two paramters; the file_path and a either customers or vendors (actually you can use c or v as only the first letter is required). Output is to stdout so redirect this into file as required.
+Get customer data from the GnuCash XML file and output in a form suitable for direct import back into GnuCash via the import plugin. It doesn't as yet work correctly for vendors, (TODO).  Works by parsing the XML file directly rather than through GnuCash's API.  Makes no changes to the source file.  Take two paramters; the file_path and a either customers or vendors (actually you can use c or v as only the first letter is required). Output is to stdout so redirect this into file as required.
 
 === paypal2gnucash.py
 
 Get transaction data as a CSV download from PayPal use this script to convert it to a format suitable for import into gnucash.  If foriegn currencies (not GBP in this case) are involved then it gets the converted GBP price not the transaction currency.  User in other locales can edit the file to suit their currency.
+
+=== rapid_mail2gnucash.py
+
+I use mostly Rapid electronics for my components. Each time I order I at a confimation e-mail. This script, run from an action in claws-mail, creates a GnuCash importable CSV. It also populates my parts-stock database with the purchased items. 
 
 == Disclaimer
 
