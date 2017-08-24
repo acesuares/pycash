@@ -159,11 +159,11 @@ for line in data:
             linenum += 1
 footer = False
 
-            
 
 
 
-# Now format this to 
+
+# Now format this to
 #id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
 Reader = csv.reader(csv_data, delimiter=',')
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
@@ -176,11 +176,11 @@ for row in Reader:
     if row[0].isdigit(): # We only use numbered lines
         outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " > " + row[2] + SEP + "ea" + SEP +
             ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
-        
 
-# Deal with the footer rows     
+
+# Deal with the footer rows
     else:
-        if row[2].strip() == "DELIVERY": 
+        if row[2].strip() == "DELIVERY":
             delivery = row[3].replace(MONEY, "")
             outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "DELIVERY" + SEP + "ea" + SEP +
             "Business Expenses" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
@@ -191,7 +191,7 @@ for row in Reader:
                 "Rounding is appled to the confirmation mail so this has to be accounted for here" +
                 SEP + date_opened + SEP + "Rounding adjustment" + SEP +"ea" + SEP +
                 "Business Expenses" + SEP + "1" + SEP + adjustment + SEP*4 +  "no" + SEP*7)
-        elif row[2].strip() == "VAT": 
+        elif row[2].strip() == "VAT":
             vat = row[3].replace(MONEY, "")
             outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP +
             "Business Expenses" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
@@ -199,7 +199,7 @@ for row in Reader:
         footerRow += 1
     outline += os.linesep
     print outline
-    
+
     ofile.write(outline)
 ofile.close()
 
@@ -220,7 +220,7 @@ except:
     print "Already in database"
     quit(0)
 db.commit()
-cur.execute("Select id from orders where bill_id = %s",(INV_ID))
+cur.execute("Select id from orders where bill_id = %s",(INV_ID,))
 bid = cur.fetchone()['id']
 
 
