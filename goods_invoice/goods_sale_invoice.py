@@ -9,18 +9,17 @@
  Create the invoice with the QRCode and details of how to pay in bitcoins as a pdf.
  Save to disk, and/or mail it or whatever.
  We need to set gnucash-env before running this
- Run with 
+ Run with
  and Gnucash which has fixed python bindings :)
  ~/progs/gnucash-master/bin/gnucash-env ./goods_sale_invoice.py invoice_number gnucash_file
  Edit the __main__ section to add a default GnuCash file.
- Better yet, improve the whole thing, do a pull request and send me some beer 
+ Better yet, improve the whole thing, do a pull request and send me some beer
  money to say thankyou.
- 
+
  For conversion to pdf we need:
- wkhtmltopdf from repos or sources 
+ wkhtmltopdf from repos or sources
  and
  pdfkit from  https://pypi.python.org/pypi/pdfkit
- TODO:  Fix Mt Gox problem.
  https://bitcoinaverage.com/api.htm
 '''
 
@@ -35,9 +34,10 @@ import json
 import gnucash
 from gnucash.gnucash_core import *
 import textwrap
-import qrencode 
+try:import qrencode
+except: pass
 
-# For the pdf output    
+# For the pdf output
 import jinja2 # For the html
 import pdfkit # For the pdf
 
@@ -52,9 +52,8 @@ templateLoader = jinja2.FileSystemLoader( searchpath = cwd )
 templateEnv = jinja2.Environment( loader = templateLoader )
 TEMPLATE_FILE = "tax-invoice.jinja"
 template = templateEnv.get_template( TEMPLATE_FILE )
-MULTIBIT = '/MultiBit/multibit.info'
+#MULTIBIT = '/MultiBit/multibit.info'
 bitcoinaverage_url = "https://api.bitcoinaverage.com/ticker/global/GBP/"
-mtgox_url = "https://data.mtgox.com/api/2/BTCGBP/money/ticker_fast" # Mt Gox no longer exists!
 bitcoins = False # True or False. Do you want bitcoin stuff on your invoice
 
 #-------------------------------------------------------------------------------
@@ -80,17 +79,17 @@ def get_bitcoin_address(search_string = ''):
     for line in lines:
         if line.find('receive') == 0 and not line.split(',')[2].strip():
             return line.split(',')[1], search
-            
-        
-    
+
+
+
 #-------------------------------------------------------------------------------
 def get_latest_price():
-    
+
     req = urllib2.Request(bitcoinaverage_url)
     res = urllib2.urlopen(req)
     price = json.load(res) #['ask']['bid']['last']
     return float(price['bid'])
-    
+
 #-------------------------------------------------------------------------------
 def open_book(account_file):
     '''
@@ -103,7 +102,7 @@ def open_book(account_file):
     root = session.book.get_root_account()
     book = session.book
     return session, book
- 
+
 #-------------------------------------------------------------------------------
 def close_session(session, save):
     '''
@@ -132,6 +131,7 @@ def create_qr_code(invoice_id, invoice_total ,exch_rate):
     @param invoice_total
     @param exch_rate
     '''
+    return
     qr_data = 'bitcoin:' \
         + get_bitcoin_address('Work Done')[0] \
         + '?amount=' + str(round(invoice_total/exch_rate,8)) \
@@ -146,14 +146,14 @@ def create_qr_code(invoice_id, invoice_total ,exch_rate):
 #-------------------------------------------------------------------------------
 def create_printable_invoice(invoice):
     # Prep the document
-    
+
     filename = "invoice-" + invoice.GetID() + ".pdf"
 
-     
+
     # TODO Add Customer, You stuff
-    
+
     # Get all the invoice data.
-    exch_rate = get_latest_price()
+    #exch_rate = get_latest_price()
     invoice_id =  invoice.GetID()
     notes = invoice.GetNotes()
     #invoice_type = invoice.GetTypeString()
@@ -170,7 +170,7 @@ def create_printable_invoice(invoice):
         job_name =  job.GetName()
         customer = job.GetOwner()
     else: customer = invoice.GetOwner()
-    customer_name = customer.GetName() 
+    customer_name = customer.GetName()
     customer_balance = customer.GetBalanceInCurrency(customer.GetCurrency()).to_double()
     amnt_due = 0 # TODO
     tax = 0 # TODO
@@ -180,9 +180,9 @@ def create_printable_invoice(invoice):
     adr3 = address.GetAddr3()
     adr4 = address.GetAddr4()
     email = address.GetEmail()
-    
+
     # Start building the invoice.pdf
-     
+
     entries = invoice.GetEntries()
     # Table headersParagraph(model.get_value(myiter, 9),styles["Normal"])
     # arrays for creating the invoice items
@@ -202,39 +202,39 @@ def create_printable_invoice(invoice):
         qty.append(entry.GetQuantity().to_double())
         action.append(entry.GetAction())
         price.append(entry.GetInvPrice().to_double())
-        
+
         description.append(entry.GetDescription())
         line_price.append(price[-1] * qty[-1])
         if accounts[-1] == "Reimbersed Postage":
             postage_total += price[-1] * qty[-1]
         else: goods_total += price[-1] * qty[-1]
-    
-    # Test print stuff. delete when done with 
+
+    # Test print stuff. delete when done with
     zipped = zip(date, description, qty, action, price, line_price, accounts)
     for da,de,q,a,p, lp, acc in zipped:
          print da,de,q,a,p,lp,acc
     print "paid =",is_paid
 
-    
+
     # End test stuff
-           
+
     # TODO: Notes, payment details
 
     # Build the html page
-    
-    
+
+
     template_vars = { "invoice_id":invoice_id, "customer_name":customer_name,
                    "date_due":date_due,"date_posted":date_posted,"zipped":zipped,
-                    "due":invoice_total,"btc_due":round(invoice_total/exch_rate,8),
-                    "is_paid":is_paid, "bitcoins":bitcoins,#"c_symbol":c_symbol,
+                    "due":invoice_total,
+                    "is_paid":is_paid,
                     "customer_name":customer_name,"cust_contact":adr1,
                     "addr_2":adr2,"addr_3":adr3,"addr_4":adr4,"job_name":job_name,
-                    'notes':notes, 'bitcoin_address':get_bitcoin_address('Work Done')[0],
-                    'cwd':cwd, 'accounts':accounts, 'goods':goods_total, 
+                    'notes':notes,
+                    'cwd':cwd, 'accounts':accounts, 'goods':goods_total,
                     'postage':postage_total}
-                    
+
     # Now create a QR code
-    if bitcoins == True: create_qr_code(invoice_id, invoice_total ,exch_rate)
+    #if bitcoins == True: create_qr_code(invoice_id, invoice_total ,exch_rate)
     # Render the HTML
     outputText = template.render( template_vars )
     # to save the results
@@ -244,7 +244,7 @@ def create_printable_invoice(invoice):
     file.close()
     pdfkit.from_string(outputText, 'invoice-' + str(invoice_id) +'.pdf')
     # remove temporary files
-    try: 
+    try:
         os.remove('qr.png')
         os.remove("invoice-" + str(invoice_id) + ".html")
     except: pass
@@ -255,14 +255,14 @@ if __name__ == "__main__":
     try: invoice_num = str(sys.arv[1])
     except: invoice_num = "000133" # For testing
     try: account_file = str(sys.argv[2])
-    except: account_file="/home/mikee/Projects/bitcoin/example.gnucash" #../../bitcoin/example.gnucash" # For testing
-    print "Latest Bitcoin->GBP =", str(get_latest_price())
+    except: account_file="/home/mikee/Projects/pycash/example.gnucash" #../../bitcoin/example.gnucash" # For testing
+    #print "Latest Bitcoin->GBP =", str(get_latest_price())
     session, book = open_book(account_file)
     invoice = open_invoice(book,invoice_num) # A multi-line invoice
     create_printable_invoice(invoice)
     close_session(session, False) # Close session but don't save
 
 
-    
-    
+
+
 
