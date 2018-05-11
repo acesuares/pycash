@@ -63,3 +63,4 @@ I take no resposibility for data loss through the use of these utilities.  It is
 
 === Notes
 
+Updates to the "real world" have made several of these scripts obsolete.
