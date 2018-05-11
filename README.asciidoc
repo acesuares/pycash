@@ -18,6 +18,18 @@ Creates an invoice using the next available serial number.  Currently the invoic
 
 Add a sale directly to the register in Sales.  A mess of code used for testing the principal of creating sales transactions.  I originally planned to take data from an e-shop and auto-populate GnuCash with the sales data.  Unfinished, modify to your needs.
 
+=== goods_sale_invoice.py
+
+Create a GnuCash printable invoice.pdf that ( no longer includes a BitCoin payment QRCode )
+ and does separate subtotals for goods, postage and materials.
+ Obtain the invoice data from GnuCash using the invoice ID
+ Create the invoice with the details of how to pay as a pdf.
+ Save to disk, and/or mail it or whatever.
+ Edit the __main__ section to add a default GnuCash file.
+ Better yet, improve the whole thing, do a pull request and send me some beer
+ money to say thankyou.
+
+
 === PriceDB_test.py
 
 Just gets and prints the latest price for a stock from the GnuCash price DB.
@@ -43,11 +55,11 @@ Get transaction data as a CSV download from PayPal use this script to convert it
 
 === rapid_mail2gnucash.py
 
-I use mostly Rapid Electronics for my components. Each time I order I get a confimation e-mail. This script, run from an action in claws-mail, creates a GnuCash importable CSV. It also populates my parts-stock database with the purchased items. 
+I use mostly Rapid Electronics for my components. Each time I order I get a confimation e-mail. This script, run from an action in claws-mail, creates a GnuCash importable CSV. It also populates my parts-stock database with the purchased items.
 
 == Disclaimer
 
-I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.  These utilities are in no way part of the official GnuCash codebase and are here for use at the users own risk.  Backups, backups, backups people. 
+I take no resposibility for data loss through the use of these utilities.  It is up to the user to ensure their data are backed up and they can revert to their original data should anything go wrong.  These utilities are in no way part of the official GnuCash codebase and are here for use at the users own risk.  Backups, backups, backups people.
 
 === Notes
 
