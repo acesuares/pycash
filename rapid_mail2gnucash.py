@@ -226,7 +226,7 @@ import parts_auth # Users will have create this file with their db auth data
 db = MySQLdb.connect(host = parts_auth.host, db = parts_auth.db,  user = parts_auth.user, passwd = parts_auth.passwd)
 cur = db.cursor(MySQLdb.cursors.DictCursor)
 
-
+bid=None
 try:
     cur.execute("INSERT INTO orders(bill_id, supp_id, datetime, ord_num) VALUES(%s,%s,%s,%s)",(INV_ID, 1,ord_date, ord_num ))
     db.commit()
@@ -255,6 +255,7 @@ db.commit()
 cur.execute("SELECT * from parts")
 parts = cur.fetchall()
 
+'''
 for part in parts:
     if 'Pack' in part['descrip']:
         multi = part['descrip'].split('Pack')[1].strip()
@@ -266,3 +267,4 @@ for part in parts:
         cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
         cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
+'''
