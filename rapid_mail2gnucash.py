@@ -252,19 +252,15 @@ db.commit()
 # Now update the multiples.
 # NB: This should be done somewhere above rather than a separate thing
 # TODO: Also for lengths, weights...
-cur.execute("SELECT * from parts")
+# TODO: Don't add new lines for same parts, just increment the count.
+
+cur.execute("SELECT * from parts WHERE descrip LIKE '%pack%'")
 parts = cur.fetchall()
 
-'''
 for part in parts:
-    if 'Pack' in part['descrip']:
-        multi = part['descrip'].split('Pack')[1].strip()
-        if 'of' in multi:
-            multi = multi.split('of')[1].strip()
-        if 'Of' in multi:
-            multi = multi.split('Of')[1].strip()
-        print (part['id'], multi)
-        cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
-        cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
+    multi = multi.split()[-1].strip()
+    print (part['id'], multi)
+    cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
+    cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
 '''
