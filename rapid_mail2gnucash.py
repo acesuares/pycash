@@ -263,4 +263,4 @@ for part in parts:
     cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
     cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
-'''
+
