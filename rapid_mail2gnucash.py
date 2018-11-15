@@ -125,7 +125,7 @@ for line in data:
             pydate = datetime.strptime(date_str, "%d/%m/%Y %H:%M:%S")
             date_opened = datetime.strftime(pydate,'%Y-%m-%d')
             DEBUG(date_opened)
-        elif line.startswith('PayPal'):
+        elif line.startswith('Despatch Type'):
             header = False # Processed
             items = True
     if not header and items and not footer:
@@ -253,14 +253,13 @@ db.commit()
 # NB: This should be done somewhere above rather than a separate thing
 # TODO: Also for lengths, weights...
 # TODO: Don't add new lines for same parts, just increment the count.
-
+quit(0)
 cur.execute("SELECT * from parts WHERE descrip LIKE '%pack%'")
 parts = cur.fetchall()
 
 for part in parts:
-    multi = multi.split()[-1].strip()
+    multi = part['descrip'].split()[-1].strip()
     print (part['id'], multi)
     cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
     cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
-
