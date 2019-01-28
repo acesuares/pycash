@@ -129,13 +129,19 @@ for line in data:
         elif line.startswith('PayPal'):
             header = False # Processed
             items = True
-            
+
+    if line.find("Supplier and delivery details:") != -1: # Nearly done
+            #print "Nearly done"
+            items = False
+            footer = True
+            #print line
+                    
     if not header and items and not footer:
         # Now the parts stuff
         #DEBUG(line)
         if line.startswith('---'):
             line = next(data)
-            if line.strip().startswith('|'): desc = line.replace('|','').strip()
+            if line.strip().startswith('|'): desc = "\"" + line.replace('|','').strip() + "\""
             DEBUG(desc)
             
         elif line.strip().startswith("Stock no.:"):
@@ -146,6 +152,7 @@ for line in data:
             DEBUG(qty)
             unit_price = "0"
             csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
+            print (str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
         '''elif line.strip().startswith("Unit Price:"):
             DEBUG(line)
             unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
@@ -154,18 +161,13 @@ for line in data:
             csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
             desc = ''
             '''
-        if line.find("Supplier and delivery details:") == 0: # Nearly done
-            #print "Nearly done"
-            items = False
-            footer = True
-            #print line
-            
-    if footer and not items and not header:
+       
+    if footer:# and not items and not header:
         #print "footer"
         # Cost per item shown on e-mail are rounded we need to adjust for that.
         if line.strip().endswith('Date of order:'):
             line = next(data)
-            date_str = line.strip().split('|')[0].encode('utf8')
+            date_str = line.strip().split('|')[0]#.encode('utf8')
             pydate = datetime.strptime(date_str, "%a, %d %b %Y, %H:%M")
             date_opened = datetime.strftime(pydate,'%Y-%m-%d')
             DEBUG(date_opened)
@@ -191,7 +193,7 @@ footer = False
 
 # Now format this to
 #id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
-Reader = csv.reader(csv_data, delimiter=',')
+Reader = csv.reader(csv_data, delimiter=',' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
 SEP = ',' # Field separator.
 MONEY = "£"
