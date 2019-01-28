@@ -202,7 +202,7 @@ ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
 for row in Reader:
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
-        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " > " + row[2] + SEP + "ea" + SEP +
+        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP  + "\"" + row[1] + "> " + row[2] + "\"" + SEP + "ea" + SEP +
             ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
 
 
