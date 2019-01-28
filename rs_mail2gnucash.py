@@ -51,6 +51,7 @@ from datetime import datetime
 from decimal import Decimal
 import logging
 import codecs
+import html2text
 
 #logger = logging.getLogger("librarian")
 logging.basicConfig(level=logging.DEBUG, format='%(module)s: LINE %(lineno)d: %(levelname)s: %(message)s')
@@ -59,8 +60,8 @@ DEBUG = logging.debug
 INFO = logging.info
 
 HOME = expanduser("~")
-VENDOR_ID ="000013" # Obviously this needs to match your vendor ID for this supplier
-INV_ID = None
+VENDOR_ID ="000005" # Obviously this needs to match your vendor ID for this supplier
+INV_ID = ''
 
 try:
     INFILE=sys.argv[1]
@@ -73,7 +74,7 @@ try:
 except:
     print ("No order number specified. Using the order number in the e-mail.")
     print ("Useage: Useage: rapid2gnucash.py  \"SAVED_RAPID_CONFIRMATION_MAIL\" \"ORDER_NUMBER\" \"OPT_ACCOUT\"")
-    INV_ID="foo" # Just prevent None type errors later.
+    INV_ID="" # Just prevent None type errors later.
 try:
     ACCOUNT=sys.argv[3]
 except:
@@ -83,7 +84,11 @@ except:
 OUTFILE = INFILE + ".csv"
 # Load the file
 infile = open(INFILE, 'rb')
-data = infile.readlines()
+
+html = infile.read()
+text = html2text.html2text(html)
+data = text.split('\n')
+infile.close()
 #soup = BeautifulSoup(infile)
 infile.close()
 #print(data)
@@ -108,51 +113,62 @@ running_total = Decimal(0.0)
 for line in data:
     if header:
         # Do the header stuff
-        if line.startswith('Your Rapid web order number is'):
-            ord_num = line.split('Your Rapid web order number is')[1].strip()
-            DEBUG(ord_num)
-        if line.startswith('Your Reference:'):
+        if line.strip().endswith('Your order number:'):
             line = next(data)
             tmp = line.strip()
             if tmp == '': # Then use the supplied INV_ID
                 pass
             else:
-                INV_ID = tmp
+                if INV_ID == '': INV_ID = tmp
             DEBUG("INV_ID = " + str(INV_ID))
-        elif line.startswith('Order Date:'):
-            line = next(data)
-            date_str = line.strip().encode('utf8')
-            pydate = datetime.strptime(date_str, "%d/%m/%Y %H:%M:%S")
-            date_opened = datetime.strftime(pydate,'%Y-%m-%d')
-            DEBUG(date_opened)
+        if 'Reference:' in line:
+            ord_num = line.split('Reference:')[1].strip()
+            DEBUG(ord_num)
+            header = False # Processed
+            items = True
         elif line.startswith('PayPal'):
             header = False # Processed
             items = True
+            
     if not header and items and not footer:
         # Now the parts stuff
-        DEBUG(line)
-        if line.startswith('Description:'):
-            desc = line.split('Description:')[1].strip()
-        elif line.strip().startswith("Order code:"):
-            part_num = line.split("Order code:")[1].strip()
+        #DEBUG(line)
+        if line.startswith('---'):
+            line = next(data)
+            if line.strip().startswith('|'): desc = line.replace('|','').strip()
+            DEBUG(desc)
+            
+        elif line.strip().startswith("Stock no.:"):
+            part_num = line.split("Stock no.:")[1].strip()
             DEBUG(part_num)
-        elif line.strip().startswith("Quantity:"):
-            qty = line.split("Quantity:")[1].strip()
-        elif line.strip().startswith("Unit Price:"):
+        elif line.strip().startswith("Qty:"):
+            qty = line.split("Qty:")[1].strip()
+            DEBUG(qty)
+            unit_price = "0"
+            csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
+        '''elif line.strip().startswith("Unit Price:"):
             DEBUG(line)
             unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
             DEBUG(unit_price)
             running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
             csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
             desc = ''
-        elif line.find("Order Total") == 0: # Nearly done
+            '''
+        if line.find("Supplier and delivery details:") == 0: # Nearly done
             #print "Nearly done"
             items = False
             footer = True
             #print line
-    if footer:
+            
+    if footer and not items and not header:
         #print "footer"
         # Cost per item shown on e-mail are rounded we need to adjust for that.
+        if line.strip().endswith('Date of order:'):
+            line = next(data)
+            date_str = line.strip().split('|')[0].encode('utf8')
+            pydate = datetime.strptime(date_str, "%a, %d %b %Y, %H:%M")
+            date_opened = datetime.strftime(pydate,'%Y-%m-%d')
+            DEBUG(date_opened)
         if line.strip().startswith("Total"):
             print (line)
             line = next(data)
@@ -171,9 +187,6 @@ for line in data:
                 csv_data.append( ", , DELIVERY, " + amnt + ", " + "1" + ", " + amnt)
             linenum += 1
 footer = False
-
-
-
 
 
 # Now format this to
@@ -215,7 +228,7 @@ for row in Reader:
 
     ofile.write(outline)
 ofile.close()
-
+quit(0)
 
 # Now insert the data into a MySQl database.parts_auth.
 import MySQLdb
@@ -263,4 +276,3 @@ for part in parts:
     cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
     cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
-'''
