@@ -103,8 +103,11 @@ data = iter(data)
 header = True
 items = False
 footer = False
-desc = ''
+desc = None
+item = 0
 running_total = Decimal(0.0)
+
+# Now loop over the e-mail lines.
 for line in data:
     if header:
         # Do the header stuff
@@ -126,25 +129,38 @@ for line in data:
             date_opened = datetime.strftime(pydate,'%Y-%m-%d')
             DEBUG(date_opened)
         elif line.startswith('Despatch Type'):
+            next(data)
             header = False # Processed
             items = True
+            
+    # Header stuff is done so move on to the items
+            # The next line with any text in it is the first description.
     if not header and items and not footer:
         # Now the parts stuff
         DEBUG(line)
-        if line.startswith('Description:'):
-            desc = line.split('Description:')[1].strip()
-        elif line.strip().startswith("Order code:"):
-            part_num = line.split("Order code:")[1].strip()
-            DEBUG(part_num)
-        elif line.strip().startswith("Quantity:"):
-            qty = line.split("Quantity:")[1].strip()
-        elif line.strip().startswith("Unit Price:"):
-            DEBUG(line)
-            unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
-            DEBUG(unit_price)
-            running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
-            csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
-            desc = ''
+        if len(line.strip()) == 0 and item == 0:
+            continue #Loop over empty lines then...
+        else:
+            if not desc:
+                desc = line.strip()
+                item = 1
+                DEBUG(desc)
+        if item == 1:
+            if line.strip().startswith("Order code:"):
+                part_num = line.split(":")[1].strip().strip('"')
+                DEBUG(part_num)
+            elif line.strip().startswith("Quantity:"):
+                qty = line.split("Quantity:")[1].strip()
+                DEBUG(qty)
+            elif line.strip().startswith("Unit Price:"):
+                DEBUG(line)
+                unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
+                DEBUG(unit_price)
+                running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
+                csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
+            elif line.strip().startswith("Total price:"):
+                desc = None
+                item = 0 # Done that. loop to the next
         elif line.find("Order Total") == 0: # Nearly done
             #print "Nearly done"
             items = False
@@ -187,7 +203,7 @@ ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
 for row in Reader:
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
-        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " > " + row[2] + SEP + "ea" + SEP +
+        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " >" + row[2] + SEP + "ea" + SEP +
             ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
 
 
@@ -216,6 +232,7 @@ for row in Reader:
     ofile.write(outline)
 ofile.close()
 
+quit(0) # Remove me
 
 # Now insert the data into a MySQl database.parts_auth.
 import MySQLdb
