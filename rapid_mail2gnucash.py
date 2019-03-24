@@ -232,7 +232,7 @@ for row in Reader:
     ofile.write(outline)
 ofile.close()
 
-quit(0) # Remove me
+#quit(0) # Remove me
 
 # Now insert the data into a MySQl database.parts_auth.
 import MySQLdb
