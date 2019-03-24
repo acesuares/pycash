@@ -91,130 +91,35 @@ encoded = ""
 start64 = False
 print ("")
 csv_data = []
-csv_data.append("line_num,part_num,desc,unit_price,qty,amnt")
+csv_data.append("Line, Order Code / Description, Unit, Quantity, List Price, Net Price, VAT Rate, Amount")
 linenum = 1
 date_opened=""
 my_ref = None
 ord_num = None
 ord_date = None
-
-
 data = iter(data)
 header = True
 items = False
 footer = False
 desc = ''
 running_total = Decimal(0.0)
+
+
 for line in data:
-    if header:
-        # Do the header stuff
-        if line.startswith('Your Rapid web order number is'):
-            ord_num = line.split('Your Rapid web order number is')[1].strip()
-            DEBUG(ord_num)
-        if line.startswith('Your Reference:'):
-            line = next(data)
-            tmp = line.strip()
-            if tmp == '': # Then use the supplied INV_ID
+    #print line
+    if line.startswith('Customer Order No'):
+        ord_num = line.split(':')[1].split()[0]
+    if line.strip().startswith('Line'):
+        try:
+            while not data.next().split()[0].isdigit():
                 pass
-            else:
-                INV_ID = tmp
-            DEBUG("INV_ID = " + str(INV_ID))
-        elif line.startswith('Order Date:'):
-            line = next(data)
-            date_str = line.strip().encode('utf8')
-            pydate = datetime.strptime(date_str, "%d/%m/%Y %H:%M:%S")
-            date_opened = datetime.strftime(pydate,'%Y-%m-%d')
-            DEBUG(date_opened)
-        elif line.startswith('PayPal'):
-            header = False # Processed
-            items = True
-    if not header and items and not footer:
-        # Now the parts stuff
-        DEBUG(line)
-        if line.startswith('Description:'):
-            desc = line.split('Description:')[1].strip()
-        elif line.strip().startswith("Order code:"):
-            part_num = line.split("Order code:")[1].strip()
-            DEBUG(part_num)
-        elif line.strip().startswith("Quantity:"):
-            qty = line.split("Quantity:")[1].strip()
-        elif line.strip().startswith("Unit Price:"):
-            DEBUG(line)
-            unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
-            DEBUG(unit_price)
-            running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
-            csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
-            desc = ''
-        elif line.find("Order Total") == 0: # Nearly done
-            #print "Nearly done"
-            items = False
-            footer = True
-            #print line
-    if footer:
-        #print "footer"
-        # Cost per item shown on e-mail are rounded we need to adjust for that.
-        if line.strip().startswith("Total"):
-            print (line)
-            line = next(data)
-            DEBUG(line)
-            amnt = line.split("£")[1].strip()
-            csv_data.append(", , Rounding adjustment, " + str(Decimal(amnt) - running_total) + ", " + "1" + ", " + str(Decimal(amnt) - running_total))
-        if line.strip().startswith("VAT"):
-            line = next(data)
-            amnt = line.replace('££', '£').split("£")[1].encode('utf8').strip()
-            csv_data.append(", , VAT, " + amnt + ", " + "1" + ", " + amnt)
-            linenum += 1
-        elif line.strip().startswith("Delivery:"):
-            line = next(data)
-            if not line.startswith('Free'):
-                amnt = line.replace('££', '£').split("£")[1].strip()
-                csv_data.append( ", , DELIVERY, " + amnt + ", " + "1" + ", " + amnt)
-            linenum += 1
-footer = False
-
-
-
-
-
-# Now format this to
-#id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
-Reader = csv.reader(csv_data, delimiter=',')
-footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
-SEP = ',' # Field separator.
-MONEY = "£"
-
-ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
-for row in Reader:
-    outline = ""
-    if row[0].isdigit(): # We only use numbered lines
-        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + row[1] + " > " + row[2] + SEP + "ea" + SEP +
-            ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
-
-
-# Deal with the footer rows
-    else:
-        if row[2].strip() == "DELIVERY":
-            delivery = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "DELIVERY" + SEP + "ea" + SEP +
-            "Business Expenses" + SEP + "1" + SEP + delivery  + SEP*4 + "no" + SEP*7)
-            #print outline # pipe to file for GnuCash import
-        elif row[2].strip() == "Rounding adjustment":
-            adjustment = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*2 +
-                "Rounding is appled to the confirmation mail so this has to be accounted for here" +
-                SEP + date_opened + SEP + "Rounding adjustment" + SEP +"ea" + SEP +
-                "Business Expenses" + SEP + "1" + SEP + adjustment + SEP*4 +  "no" + SEP*7)
-        elif row[2].strip() == "VAT":
-            vat = row[3].replace(MONEY, "")
-            outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP +
-            "Business Expenses" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
-            #print outline # pipe to file for GnuCash import
-        footerRow += 1
-    outline += os.linesep
-    print (outline)
-
-    ofile.write(outline)
-ofile.close()
+        except:
+            line = data.next()
+        print line
+        line = data.next()
+        print line
+print ord_num
+quit(0)
 
 
 # Now insert the data into a MySQl database.parts_auth.
@@ -263,4 +168,4 @@ for part in parts:
     cur.execute("UPDATE parts SET multi = %s WHERE id = %s",(multi, part['id']))
     cur.execute("UPDATE parts SET multi = 1 WHERE multi IS NULL")
 db.commit()
-'''
+
