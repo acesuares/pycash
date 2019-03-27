@@ -130,6 +130,7 @@ for line in data:
             DEBUG(date_opened)
         elif line.startswith('Despatch Type'):
             next(data)
+            line = next(data)
             header = False # Processed
             items = True
 
