@@ -20,7 +20,7 @@
 #       MA 02110-1301, USA.
 
 Dump the DB with:
-mysqldump kicad_sqlparts -p --routines> kicad_sqlparts.sql
+mysqldump parts -p --routines > parts.sql
 
 
 Convert confirmation mail from Rapid Electronics (UK) to CSV.
@@ -132,7 +132,7 @@ for line in data:
             next(data)
             header = False # Processed
             items = True
-            
+
     # Header stuff is done so move on to the items
             # The next line with any text in it is the first description.
     if not header and items and not footer:
