@@ -88,7 +88,7 @@ except:
 try:
     ACCOUNT=sys.argv[3]
 except:
-    ACCOUNT="Expenses|Materials General" # Default if absent on the command line.  Edit to suit your account tree
+    ACCOUNT="Expenses:Materials General" # Default if absent on the command line.  Edit to suit your account tree
 
 
 OUTFILE = INFILE + ".csv"
@@ -120,7 +120,9 @@ items = False
 item = False
 footer = False
 desc = ''
-running_total = Decimal(0.0)
+running_total = 0.0
+vat_rate = 0.20
+
 for line in data:
     #DEBUG(line)
     #print(line.strip('|-').lstrip())
@@ -179,6 +181,7 @@ for line in data:
             DEBUG(unit_price)
             csv_data.append("|".join([str(linenum),part_num,desc,unit_price,qty]))
             DEBUG("|".join([str(linenum),part_num,desc,unit_price,qty]))
+            running_total += float(qty) + float(unit_price)
             linenum += 1
             item = False
 
@@ -253,10 +256,13 @@ for row in reader:
             #print outline # pipe to file for GnuCash import
         footerRow += 1
     '''
+
     outline += os.linesep
     DEBUG (outline)
 
     ofile.write(outline)
+outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP + "Expenses:VAT" + SEP + "1" + SEP + repr(round(running_total * vat_rate,2)) + SEP*4 +  "no" + SEP*7)
+ofile.write(outline)
 ofile.close()
 quit(0)
 
