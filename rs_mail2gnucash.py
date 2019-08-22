@@ -88,7 +88,7 @@ except:
 try:
     ACCOUNT=sys.argv[3]
 except:
-    ACCOUNT="Business Expenses" # Default if absent on the command line.  Edit to suit your account tree
+    ACCOUNT="Expenses|Materials General" # Default if absent on the command line.  Edit to suit your account tree
 
 
 OUTFILE = INFILE + ".csv"
@@ -177,8 +177,8 @@ for line in data:
         if item and line.strip().strip("|").strip().startswith(u'\xA3'):
             unit_price = line.split(u'\xA3')[1].strip()
             DEBUG(unit_price)
-            csv_data.append(",".join([str(linenum),part_num,desc,unit_price,qty]))
-            DEBUG(",".join([str(linenum),part_num,desc,unit_price,qty]))
+            csv_data.append("|".join([str(linenum),part_num,desc,unit_price,qty]))
+            DEBUG("|".join([str(linenum),part_num,desc,unit_price,qty]))
             linenum += 1
             item = False
 
@@ -218,7 +218,7 @@ footer = False
 
 # Now format this to
 #id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
-reader = csv.reader(csv_data, delimiter=',' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
+reader = csv.reader(csv_data, delimiter='|' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
 SEP = ',' # Field separator.
 MONEY = u"\xA3"
@@ -233,6 +233,7 @@ for row in reader:
 
 
 # Deal with the footer rows
+    '''
     else:
         if row[2].strip() == "DELIVERY":
             delivery = row[3].replace(MONEY, "")
@@ -251,6 +252,7 @@ for row in reader:
             "Business Expenses" + SEP + "1" + SEP + vat + SEP*4 +  "no" + SEP*7)
             #print outline # pipe to file for GnuCash import
         footerRow += 1
+    '''
     outline += os.linesep
     DEBUG (outline)
 
