@@ -32,7 +32,17 @@ rapid_mail2gnucash.py  %p %u
 This will pop up a prompt for your invoice number.
 The CSV can then be imported in the usual way.
 
+A typical prt looks like:
 
+MCU 8-Bit AVR RISC 8KB Flash 2.5/3.3/5V
+Stock no.: 1331667
+Qty: 5
+Your part numbers:
+Cost Centre:
+Fulfilment Country: GB
+Delivery Date:
+5 Delivered 16/08/2019
+4.55
 
 The csv output data should look like:
 line number,product code,quantity,availability,product description,unit price,discounts,line total,delivery,sub total,vat,grand total
@@ -88,9 +98,8 @@ infile = open(INFILE, 'r', encoding='utf-8')
 html = infile.read()
 infile.close()
 text = html2text.html2text(html)
-DEBUG(text)
+#DEBUG(text)
 data = text.split('\n')
-#DEBUG(data)
 encoded = ""
 start64 = False
 print ("")
@@ -108,10 +117,12 @@ data = iter(data)
 #    print (line.strip())
 header = True
 items = False
+item = False
 footer = False
 desc = ''
 running_total = Decimal(0.0)
 for line in data:
+    #DEBUG(line)
     #print(line.strip('|-').lstrip())
     #continue
     if header:
@@ -119,23 +130,25 @@ for line in data:
         if line.strip().endswith('Your order number:'):
             line = next(data).strip('|-').lstrip()
             tmp = line.strip()
-            DEBUG(tmp)
+            INV_ID = tmp
             if tmp == '': # Then use the supplied INV_ID
                 pass
             else:
                 if INV_ID == '': INV_ID = tmp
-            DEBUG("INV_ID = " + str(INV_ID))
-        if 'Reference:' in line:
+            #DEBUG("INV_ID = " + str(INV_ID))
+        '''if 'Reference:' in line:
             ord_num = line.split('Reference:')[1].strip()
             DEBUG(ord_num)
             header = False # Processed
-            items = True
-        elif line.startswith('Items ordered'):
+            items = True'''
+        if line.strip("|").strip().startswith('Items ordered'):
             # The next next line is the first item
-            next(data)
-            line = next(data).strip('|-').lstrip()
-            desc = line
-            DEBUG(desc)
+            #DEBUG("Reached items list.")
+            line = next(data)
+            line = next(data)
+            #line = next(data).strip('|-').lstrip()
+            #desc = line
+            #DEBUG(desc)
             header = False # Processed
             items = True
 
@@ -146,21 +159,29 @@ for line in data:
             #print line
 
     if items and not header and not footer:
-        DEBUG("# Now the parts stuff")
-        DEBUG(line)
-        if line.startswith(u'\xA3'):
-            pass
-
-
-        elif line.strip().startswith("Stock no.:"):
-            part_num = line.split("Stock no.:")[1].strip()
-            DEBUG(part_num)
-        elif line.strip().startswith("Qty:"):
+        DEBUG(line.strip().strip("|").strip())
+        if line.strip().strip("|").strip().startswith("---"):
+            continue
+        if line.strip("|").strip().startswith("Running Total "):
+            footer = True
+            items = False
+        if item == False:
+            desc = line.strip().strip("|").strip()
+            DEBUG(desc)
+            item = True
+        if item and line.strip().strip("|").strip().startswith("Stock no.:"):
+            part_num = line.strip().strip("|").split("Stock no.:")[1].strip()
+        if item and line.strip().strip("|").strip().startswith("Qty:"):
             qty = line.split("Qty:")[1].strip()
             DEBUG(qty)
-            unit_price = "0"
-            csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
-            print (str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
+        if item and line.strip().strip("|").strip().startswith(u'\xA3'):
+            unit_price = line.split(u'\xA3')[1].strip()
+            DEBUG(unit_price)
+            csv_data.append(",".join([str(linenum),part_num,desc,unit_price,qty]))
+            DEBUG(",".join([str(linenum),part_num,desc,unit_price,qty]))
+            linenum += 1
+            item = False
+
 
 
     if footer:# and not items and not header:
@@ -197,13 +218,14 @@ footer = False
 
 # Now format this to
 #id,date_opened,vendor_id,billing__id,notes,date,desc,action,account,quantity,price,disc_type,disc_how,discount,taxable,taxincluded,tax_table,date_posted,due_date,account_posted,memo_posted,accu_splits,
-Reader = csv.reader(csv_data, delimiter=',' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
+reader = csv.reader(csv_data, delimiter=',' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
 SEP = ',' # Field separator.
 MONEY = u"\xA3"
 
 ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
-for row in Reader:
+for row in reader:
+    #DEBUG(row)
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
         outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP  + "\"" + row[1] + " > " + row[2] + "\"" + SEP + "ea" + SEP +
@@ -230,7 +252,7 @@ for row in Reader:
             #print outline # pipe to file for GnuCash import
         footerRow += 1
     outline += os.linesep
-    print (outline)
+    DEBUG (outline)
 
     ofile.write(outline)
 ofile.close()
