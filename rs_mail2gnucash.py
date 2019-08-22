@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
 #
@@ -67,7 +67,7 @@ try:
     INFILE=sys.argv[1]
 except:
     print ("No input files specified.")
-    print ("Useage: Useage: rapid2gnucash.py  \"SAVED_RAPID_CONFIRMATION_MAIL\" \"ORDER_NUMBER\" \"OPT_ACCOUNT\"")
+    print ("Useage: Useage: rs2gnucash.py  \"SAVED_RAPID_CONFIRMATION_MAIL\" \"ORDER_NUMBER\" \"OPT_ACCOUNT\"")
     quit(1)
 try:
     INV_ID=sys.argv[2]
@@ -83,15 +83,14 @@ except:
 
 OUTFILE = INFILE + ".csv"
 # Load the file
-infile = open(INFILE, 'rb')
+infile = open(INFILE, 'r', encoding='utf-8')
 
 html = infile.read()
+infile.close()
 text = html2text.html2text(html)
+DEBUG(text)
 data = text.split('\n')
-infile.close()
-#soup = BeautifulSoup(infile)
-infile.close()
-#print(data)
+#DEBUG(data)
 encoded = ""
 start64 = False
 print ("")
@@ -105,17 +104,22 @@ ord_date = None
 
 
 data = iter(data)
+#for line in data:
+#    print (line.strip())
 header = True
 items = False
 footer = False
 desc = ''
 running_total = Decimal(0.0)
 for line in data:
+    #print(line.strip('|-').lstrip())
+    #continue
     if header:
         # Do the header stuff
         if line.strip().endswith('Your order number:'):
-            line = next(data)
+            line = next(data).strip('|-').lstrip()
             tmp = line.strip()
+            DEBUG(tmp)
             if tmp == '': # Then use the supplied INV_ID
                 pass
             else:
@@ -126,7 +130,12 @@ for line in data:
             DEBUG(ord_num)
             header = False # Processed
             items = True
-        elif line.startswith('PayPal'):
+        elif line.startswith('Items ordered'):
+            # The next next line is the first item
+            next(data)
+            line = next(data).strip('|-').lstrip()
+            desc = line
+            DEBUG(desc)
             header = False # Processed
             items = True
 
@@ -135,15 +144,14 @@ for line in data:
             items = False
             footer = True
             #print line
-                    
-    if not header and items and not footer:
-        # Now the parts stuff
-        #DEBUG(line)
-        if line.startswith('---'):
-            line = next(data)
-            if line.strip().startswith('|'): desc = "\"" + line.replace('|','').strip() + "\""
-            DEBUG(desc)
-            
+
+    if items and not header and not footer:
+        DEBUG("# Now the parts stuff")
+        DEBUG(line)
+        if line.startswith(u'\xA3'):
+            pass
+
+
         elif line.strip().startswith("Stock no.:"):
             part_num = line.split("Stock no.:")[1].strip()
             DEBUG(part_num)
@@ -153,40 +161,36 @@ for line in data:
             unit_price = "0"
             csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
             print (str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
-        '''elif line.strip().startswith("Unit Price:"):
-            DEBUG(line)
-            unit_price = line.replace('££', '£').split("Unit Price:")[1].split("£")[-1].strip()
-            DEBUG(unit_price)
-            running_total += Decimal(unit_price) * Decimal(qty)# We need this to adjust for rounding errors
-            csv_data.append(str(linenum) + ", " + part_num + ", " + desc + ", " + unit_price + ", " + qty + ", " + ", ")
-            desc = ''
-            '''
-       
+
+
     if footer:# and not items and not header:
         #print "footer"
         # Cost per item shown on e-mail are rounded we need to adjust for that.
         if line.strip().endswith('Date of order:'):
             line = next(data)
+            DEBUG(line)
+            DEBUG(type(line))
             date_str = line.strip().split('|')[0]#.encode('utf8')
             pydate = datetime.strptime(date_str, "%a, %d %b %Y, %H:%M")
             date_opened = datetime.strftime(pydate,'%Y-%m-%d')
             DEBUG(date_opened)
         if line.strip().startswith("Total"):
-            print (line)
+            DEBUG(type(line))
             line = next(data)
-            DEBUG(line)
-            amnt = line.split("£")[1].strip()
+            DEBUG(type(line))
+            amnt = line.split(u"\xA3")[1].strip()
             csv_data.append(", , Rounding adjustment, " + str(Decimal(amnt) - running_total) + ", " + "1" + ", " + str(Decimal(amnt) - running_total))
         if line.strip().startswith("VAT"):
             line = next(data)
-            amnt = line.replace('££', '£').split("£")[1].encode('utf8').strip()
+            amnt = line.split(u"\xA3")[1].encode('utf8').strip()
             csv_data.append(", , VAT, " + amnt + ", " + "1" + ", " + amnt)
             linenum += 1
         elif line.strip().startswith("Delivery:"):
             line = next(data)
             if not line.startswith('Free'):
-                amnt = line.replace('££', '£').split("£")[1].strip()
+                #amnt = line.replace('££', '£').split("£")[1].strip()
                 csv_data.append( ", , DELIVERY, " + amnt + ", " + "1" + ", " + amnt)
+                pass
             linenum += 1
 footer = False
 
@@ -196,13 +200,13 @@ footer = False
 Reader = csv.reader(csv_data, delimiter=',' ,quoting=csv.QUOTE_ALL, skipinitialspace=True)
 footerRow = 0 # Footer rows are: Order Subtotal, Delivery Charge, VAT, Order Grand Total
 SEP = ',' # Field separator.
-MONEY = "£"
+MONEY = u"\xA3"
 
 ofile = open("/home/mikee/downloads/" + INV_ID + '.csv','w')
 for row in Reader:
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
-        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP  + "\"" + row[1] + "> " + row[2] + "\"" + SEP + "ea" + SEP +
+        outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP  + "\"" + row[1] + " > " + row[2] + "\"" + SEP + "ea" + SEP +
             ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
 
 
