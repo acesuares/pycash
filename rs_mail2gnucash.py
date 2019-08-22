@@ -177,11 +177,12 @@ for line in data:
             qty = line.split("Qty:")[1].strip()
             DEBUG(qty)
         if item and line.strip().strip("|").strip().startswith(u'\xA3'):
-            unit_price = line.split(u'\xA3')[1].strip()
+            running_total += float(line.split(u'\xA3')[1].strip())
+            unit_price = float(line.split(u'\xA3')[1].strip()) / float(qty)
             DEBUG(unit_price)
-            csv_data.append("|".join([str(linenum),part_num,desc,unit_price,qty]))
-            DEBUG("|".join([str(linenum),part_num,desc,unit_price,qty]))
-            running_total += float(qty) + float(unit_price)
+            csv_data.append("|".join([str(linenum),part_num,desc,str(unit_price),str(qty)]))
+            DEBUG("|".join([str(linenum),part_num,desc,str(unit_price),str(qty)]))
+
             linenum += 1
             item = False
 
@@ -232,7 +233,7 @@ for row in reader:
     outline = ""
     if row[0].isdigit(): # We only use numbered lines
         outline=(INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP  + "\"" + row[1] + " > " + row[2] + "\"" + SEP + "ea" + SEP +
-            ACCOUNT + SEP + row[4] + SEP + row[3].replace(MONEY, "") + SEP*4 + "no" + SEP*7)
+            ACCOUNT + SEP + row[4] + SEP + repr(round(float(row[3]),4)) + SEP*4 + "no" + SEP*7)
 
 
 # Deal with the footer rows
@@ -261,7 +262,9 @@ for row in reader:
     DEBUG (outline)
 
     ofile.write(outline)
-outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP + "Expenses:VAT" + SEP + "1" + SEP + repr(round(running_total * vat_rate,2)) + SEP*4 +  "no" + SEP*7)
+DEBUG(running_total)
+DEBUG(repr(round(running_total * vat_rate,3)))
+outline = (INV_ID + SEP + date_opened + SEP + VENDOR_ID + SEP*3 + date_opened + SEP + "VAT" + SEP +"tax" +SEP + "Expenses:VAT" + SEP + "1" + SEP + repr(round(running_total * vat_rate,4)) + SEP*4 +  "no" + SEP*7)
 ofile.write(outline)
 ofile.close()
 quit(0)
